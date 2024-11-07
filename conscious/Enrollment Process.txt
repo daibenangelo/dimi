@@ -1,0 +1,14 @@
+Enrollment Procedure for New Students:
+Program Chairperson: Fill out the Enrollment Permit and Registration Form.
+Registrar: Submit requirements and have student data encoded.
+Medical & Dental Unit: Submit forms for Enrollment Permit approval.
+SAS Unit: Apply for Free Higher Education (FHE) form approval.
+Program Chairperson: Enlist subjects and assess fees.
+Cashier: Pay fees not covered by FHE.
+Registrar: Validate enrollment.
+
+Enrollment Procedure for Returning Students:\
+SAS Unit: Apply for FHE form approval.
+Program Chairperson: Enlist subjects and assess fees.
+Cashier: Pay fees not covered by FHE.
+Registrar: Validate enrollment.

@@ -1,0 +1,26 @@
+College of Graduate Studies (CGS):
+PhD: Ed. Admin., Science Ed., Math Ed.
+Master's: Dev. Admin., Guidance & Counseling, Ed. Mgmt., Special Ed., Science Ed., Math Ed., Language Teaching, Music, PE, Home Econ., Computer Science, Biology, Master in Biology
+
+College of Arts and Sciences (CAS):
+BSc: Biology, Math, Psychology
+BA: English Language, Communication, BS Filipino
+
+College of Education (CE):
+BSEd (English, Filipino, Science, Math, Social Studies), BEEd, BCAED, BPEd
+
+College of Computer Science (CCS):
+BSc Computer Science
+
+College of Agriculture (CA):
+BSc Agriculture (Horticulture), Cert. in Agricultural Science (2 years)
+
+College of Fisheries (CF):
+BSc Fisheries, Master in Fisheries
+
+College of Community Health & Allied Medical Sciences (CCHAMS):
+BSc Nursing, BSc Midwifery
+
+College of Medicine:
+Doctor of Medicine
+BTLEd (ICT, Home Econ., Agri-Fishery Arts), BSNEd, BECED
