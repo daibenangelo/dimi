@@ -8,7 +8,6 @@ let defaultSelectedFiles = [
     "Institutional Profile.txt"];
 
 $(document).ready(function() {
-    alert("hey");
     // Initialize word count and token estimate
     let totalWordCount = 0;
 
