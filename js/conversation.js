@@ -1,4 +1,4 @@
-const apiKey = "%%API_KEY%%";
+const apiKey = process.env.API_KEY;
 const apiUrl = "https://api.openai.com/v1/chat/completions";
 
 function sendMessage(message) {
