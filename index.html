@@ -1,55 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DMMMSU-MLUC AI Chatbot</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-<body>
+  </head>
+  <body>
     <h1>DMMMSU-MLUC AI Chatbot</h1>
     <div id="chat-container">
-        <!-- Toggle Button for Knowledge Base -->
-        <button id="toggle-knowledge-base">Show Knowledge Base</button>
-        
-        <!-- Collapsible Knowledge Base Section -->
-        <div id="knowledge-base-section" style="display: none;">
-            <div id="checkbox-container"></div>
-            <p id="total-words"></p>
-            <p id="estimated-tokens"></p>
-            <!-- <div id="file-content"></div> -->
-        </div>
+      <!-- Toggle Button for Knowledge Base -->
+      <button id="toggle-knowledge-base">Toggle Knowledge Base</button>
 
-        <h2>Talk with Dimi</h2>
-        <input type="textarea" id="user-input" placeholder="Ask me about the school...">
-        <button id="send-btn">Send</button>
-        <div id="chat-history"></div>
+      <!-- Collapsible Knowledge Base Section -->
+      <div id="knowledge-base-section" style="display: none">
+        <div id="checkbox-container"></div>
+        <p id="total-words"></p>
+        <p id="estimated-tokens"></p>
+        <!-- <div id="file-content"></div> -->
+      </div>
+
+      <h2>Talk with Dimi</h2>
+      <input
+        type="textarea"
+        id="user-input"
+        placeholder="Ask me about the school..."
+      />
+      <button id="send-btn">Send</button>
+      <div id="chat-history"></div>
     </div>
     <script>
-        async function loadDocumentsAndScripts() {
-          try {
-            // Fetch documents
-            const response = await fetch('/files');
-            const data = await response.json();
-            window.documents = data; // Make documents globally accessible if needed
-      
-            // Dynamically load the other scripts after documents are ready
-            const conversationScript = document.createElement('script');
-            conversationScript.src = '/js/conversation.js';
-            document.body.appendChild(conversationScript);
-      
-            conversationScript.onload = () => {
-              const knowledgeLoadingScript = document.createElement('script');
-              knowledgeLoadingScript.src = '/js/knowledge_loading.js';
-              document.body.appendChild(knowledgeLoadingScript);
-            };
-          } catch (error) {
-            console.error('Error fetching documents:', error);
-          }
+      async function loadDocumentsAndScripts() {
+        try {
+          // Fetch documents
+          const response = await fetch("/files");
+          const data = await response.json();
+          window.documents = data; // Make documents globally accessible if needed
+
+          // Dynamically load the other scripts after documents are ready
+          const conversationScript = document.createElement("script");
+          conversationScript.src = "/js/conversation.js";
+          document.body.appendChild(conversationScript);
+
+          conversationScript.onload = () => {
+            const knowledgeLoadingScript = document.createElement("script");
+            knowledgeLoadingScript.src = "/js/knowledge_loading.js";
+            document.body.appendChild(knowledgeLoadingScript);
+          };
+        } catch (error) {
+          console.error("Error fetching documents:", error);
         }
-      
-        // Call the function to load documents and then other scripts
-        loadDocumentsAndScripts();
-      </script>
-</body>
+      }
+
+      // Call the function to load documents and then other scripts
+      loadDocumentsAndScripts();
+    </script>
+  </body>
 </html>
