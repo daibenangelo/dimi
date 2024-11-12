@@ -124,9 +124,6 @@ $(document).ready(function () {
   );
   if (knowledgeBaseVisible !== null) {
     $("#knowledge-base-section").toggle(knowledgeBaseVisible);
-    $("#toggle-knowledge-base").text(
-      knowledgeBaseVisible ? "Hide Knowledge Base" : "Show Knowledge Base"
-    );
   }
 
   // Toggle visibility of Knowledge Base section and save state to localStorage
