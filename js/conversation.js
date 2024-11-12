@@ -1,10 +1,10 @@
-let apiKey = "";
+let apiKey = ""; // Placeholder for the API Key
 
 const apiUrl = "https://api.openai.com/v1/chat/completions";
 
 function fetchApiKey() {
   return $.getJSON("/api/env", function (data) {
-    apiKey = data.apiKey;
+    apiKey = data.apiKey; // Store the API key from the server response
   });
 }
 
@@ -17,7 +17,7 @@ function sendMessage(message) {
       Authorization: `Bearer ${apiKey}`,
     },
     data: JSON.stringify({
-      model: "gpt-4",
+      model: "gpt-4", // Use "gpt-4-turbo" for the turbo version if desired
       messages: [
         { role: "system", content: selectedFileContents },
         { role: "user", content: message },
@@ -42,18 +42,22 @@ function displayMessage(sender, message) {
 }
 
 $(document).ready(function () {
-  $("#send-btn").on("click", function () {
-    const userInput = $("#user-input").val();
-    if (userInput.trim() !== "") {
-      displayMessage("You", userInput);
-      sendMessage(userInput);
-      $("#user-input").val("");
-    }
-  });
+  // Fetch API key once the document is ready
+  fetchApiKey().then(function () {
+    $("#send-btn").on("click", function () {
+      const userInput = $("#user-input").val();
+      if (userInput.trim() !== "") {
+        displayMessage("You", userInput);
+        sendMessage(userInput);
+        $("#user-input").val("");
+      }
+    });
 
-  $("#user-input").on("keypress", function (e) {
-    if (e.which === 13) {
-      $("#send-btn").click();
-    }
+    $("#user-input").on("keypress", function (e) {
+      if (e.which === 13) {
+        // Enter key
+        $("#send-btn").click();
+      }
+    });
   });
 });
