@@ -1,5 +1,12 @@
-const apiKey = process.env.API_KEY;
+let apiKey = "";
+
 const apiUrl = "https://api.openai.com/v1/chat/completions";
+
+function fetchApiKey() {
+  return $.getJSON("/api/env", function (data) {
+    apiKey = data.apiKey;
+  });
+}
 
 function sendMessage(message) {
   $.ajax({
@@ -10,7 +17,7 @@ function sendMessage(message) {
       Authorization: `Bearer ${apiKey}`,
     },
     data: JSON.stringify({
-      model: "gpt-4", // Use "gpt-4-turbo" for the turbo version if desired
+      model: "gpt-4",
       messages: [
         { role: "system", content: selectedFileContents },
         { role: "user", content: message },
@@ -46,7 +53,6 @@ $(document).ready(function () {
 
   $("#user-input").on("keypress", function (e) {
     if (e.which === 13) {
-      // Enter key
       $("#send-btn").click();
     }
   });
