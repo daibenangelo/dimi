@@ -18,7 +18,7 @@ $(document).ready(function () {
     $("#estimated-tokens").text(
       `Estimated tokens: ${Math.round(
         totalWordCount * 1.3
-      )} | Lower tokens = better accuracy`
+      )} | Lower tokens = faster response, better accuracy`
     );
   }
 
