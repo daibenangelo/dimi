@@ -14,7 +14,7 @@ app.use("/conscious", express.static(path.join(__dirname, "conscious")));
 
 app.get("/api/env", (req, res) => {
   res.json({
-    apiKey: "PRETEND THIS IS THE KEY",
+    apiKey: process.env.API_KEY,
   });
 });
 
