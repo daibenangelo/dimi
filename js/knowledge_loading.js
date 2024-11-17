@@ -16,9 +16,9 @@ $(document).ready(function () {
   function updateCounts() {
     $("#total-words").text(`Total number of words: ${totalWordCount}`);
     $("#estimated-tokens").text(
-      `Estimated tokens: ${Math.round(
+      `Estimated tokens: ~${Math.round(
         totalWordCount * 1.3
-      )} | Lower tokens = faster response, better accuracy`
+      )} (Lower tokens = faster response, better accuracy)`
     );
   }
 
@@ -82,7 +82,7 @@ $(document).ready(function () {
     let checkbox = $("<input />", {
       type: "checkbox",
       id: doc.filename,
-      class: "file-checkbox",
+      class: "file-checkbox form-check-input",
       value: doc.filename,
       checked: isChecked,
     });
