@@ -117,19 +117,4 @@ $(document).ready(function () {
     loadFileContent(fileName, addWords);
     saveCheckedDocuments(); // Save to localStorage whenever a checkbox is changed
   });
-
-  // Load Knowledge Base toggle state from localStorage
-  const knowledgeBaseVisible = JSON.parse(
-    localStorage.getItem("knowledgeBaseVisible")
-  );
-  if (knowledgeBaseVisible !== null) {
-    $("#knowledge-base-section").toggle(knowledgeBaseVisible);
-  }
-
-  // Toggle visibility of Knowledge Base section and save state to localStorage
-  $("#toggle-knowledge-base").on("click", function () {
-    $("#knowledge-base-section").slideToggle();
-    const isVisible = $("#knowledge-base-section").is(":visible");
-    localStorage.setItem("knowledgeBaseVisible", JSON.stringify(isVisible));
-  });
 });
