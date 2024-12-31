@@ -12,6 +12,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/js", express.static(path.join(__dirname, "js")));
+app.use("/conscious", express.static(path.join(__dirname, "conscious")));
 
 // Fetch all document names dynamically
 function getAllDocuments() {
@@ -27,7 +28,6 @@ function getAllDocuments() {
   }
 }
 
-// Use OpenAI API for selecting relevant documents
 async function selectDocuments(userQuery) {
   try {
     const documents = getAllDocuments(); // Fetch all available documents
@@ -51,15 +51,21 @@ async function selectDocuments(userQuery) {
       messages: [{ role: "system", content: prompt }],
     });
 
-    console.log("OpenAI API Response:", response.data); // Log the entire response
-    const selectedFileNames = response.choices[0].message.content
-      .split("\n")
-      .filter((name) => name.startsWith("-"))
-      .map((name) => name.trim().slice(2)); // Extract file names from response
+    // Ensure the response structure is valid
+    if (!response || !response.choices || response.choices.length === 0) {
+      throw new Error("Invalid OpenAI response structure");
+    }
+
+    // Extract the content from the first choice
+    const messageContent = response.choices[0].message.content;
+
+    // Parse the JSON object returned by OpenAI or handle as a list
+    const parsedResponse = JSON.parse(messageContent);
+    const selectedFileNames = parsedResponse.selectedFileNames || [];
 
     return { selectedFileNames };
   } catch (error) {
-    console.error("Error in selectDocuments function:", error); // Log errors here
+    console.error("Error in selectDocuments function:", error);
     throw error; // Re-throw the error to be handled by the route
   }
 }
@@ -73,12 +79,10 @@ app.post("/select-documents", async (req, res) => {
     res.json(selectedDocuments);
   } catch (error) {
     console.error("Error in /select-documents:", error); // Log the full error details
-    res
-      .status(500)
-      .json({
-        error: "An error occurred while selecting documents",
-        details: error.message,
-      });
+    res.status(500).json({
+      error: "An error occurred while selecting documents",
+      details: error.message,
+    });
   }
 });
 
@@ -109,10 +113,6 @@ app.get("/files", (req, res) => {
     res.json(documents);
   });
 });
-
-app.use("/conscious", express.static(path.join(__dirname, "conscious")));
-
-app.use(express.json());
 
 app.get("/api/env", (req, res) => {
   res.json({
