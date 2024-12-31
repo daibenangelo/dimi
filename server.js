@@ -53,7 +53,7 @@ async function selectDocuments(userQuery) {
       "https://api.openai.com/v1/chat/completions",
       {
         model: "gpt-4",
-        messages: [{ role: "system", content: prompt }],
+        messages: [{ role: "user", content: prompt }],
       },
       {
         headers: {
