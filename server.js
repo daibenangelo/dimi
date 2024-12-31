@@ -29,49 +29,56 @@ function getAllDocuments() {
 
 // Use OpenAI API for selecting relevant documents
 async function selectDocuments(userQuery) {
-  const documents = getAllDocuments(); // Fetch all available documents
-  const prompt = `
-    You are tasked with selecting the most relevant documents based on the user's query.
-    User's query: "${userQuery}"
+  try {
+    const documents = getAllDocuments(); // Fetch all available documents
+    const prompt = `
+      You are tasked with selecting the most relevant documents based on the user's query.
+      User's query: "${userQuery}"
 
-    Here is a list of documents:
-    ${documents.map((doc) => `- ${doc}`).join("\n")}
+      Here is a list of documents:
+      ${documents.map((doc) => `- ${doc}`).join("\n")}
 
-    Select the documents that are most relevant to the user's query. 
-    Return a JSON object with the following structure:
-    {
-      "selectedFileNames": ["doc1.txt", "doc3.txt"]
-    }
-  `;
+      Select the documents that are most relevant to the user's query. 
+      Return a JSON object with the following structure:
+      {
+        "selectedFileNames": ["doc1.txt", "doc3.txt"]
+      }
+    `;
 
-  // Send query to OpenAI to process and select documents
-  const response = await openai.chat.completions.create({
-    model: "gpt-4",
-    messages: [{ role: "system", content: prompt }],
-  });
+    // Send query to OpenAI to process and select documents
+    const response = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [{ role: "system", content: prompt }],
+    });
 
-  const selectedFileNames = response.choices[0].message.content
-    .split("\n")
-    .filter((name) => name.startsWith("-"))
-    .map((name) => name.trim().slice(2)); // Extract file names from response
+    console.log("OpenAI API Response:", response.data); // Log the entire response
+    const selectedFileNames = response.choices[0].message.content
+      .split("\n")
+      .filter((name) => name.startsWith("-"))
+      .map((name) => name.trim().slice(2)); // Extract file names from response
 
-  return {
-    selectedFileNames,
-  };
+    return { selectedFileNames };
+  } catch (error) {
+    console.error("Error in selectDocuments function:", error); // Log errors here
+    throw error; // Re-throw the error to be handled by the route
+  }
 }
 
 app.post("/select-documents", async (req, res) => {
   try {
     const userQuery = req.body.userQuery;
-    console.log("User query received:", userQuery);
+    console.log("User query received:", userQuery); // Log the query
     const selectedDocuments = await selectDocuments(userQuery);
-    console.log("Selected documents:", selectedDocuments);
+    console.log("Selected documents:", selectedDocuments); // Log selected documents
     res.json(selectedDocuments);
   } catch (error) {
-    console.error("Error in selectDocuments:", error.stack || error); // Log the stack trace
+    console.error("Error in /select-documents:", error); // Log the full error details
     res
       .status(500)
-      .json({ error: "An error occurred while selecting documents" });
+      .json({
+        error: "An error occurred while selecting documents",
+        details: error.message,
+      });
   }
 });
 
