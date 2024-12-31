@@ -37,7 +37,8 @@ async function selectDocuments(userQuery) {
       Here is a list of documents:
       ${documents.map((doc) => `- ${doc}`).join("\n")}
 
-      Select the documents that are most relevant to the user's query. Select as few as possible.
+      Only select the documents that are most relevant to the user's query.
+      Select as few documents as possible.
       Return a JSON object with the following structure:
       {
         "selectedFileNames": ["doc1.txt", "doc3.txt"]
