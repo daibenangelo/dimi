@@ -40,6 +40,8 @@ function sendMessage(message) {
         User's query: "${message}"
       `;
 
+      console.log(systemPrompt);
+
       // Send the user's query and context to OpenAI API
       $.ajax({
         url: apiUrl,
@@ -56,6 +58,7 @@ function sendMessage(message) {
           ],
         }),
         success: function (response) {
+          console.log("Response from /select-documents:", response);
           const botMessage = response.choices[0].message.content;
           displayMessage("Dimi", botMessage);
         },
