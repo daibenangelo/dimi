@@ -83,6 +83,12 @@ app.use("/conscious", express.static(path.join(__dirname, "conscious")));
 
 app.use(express.json());
 
+app.get("/api/env", (req, res) => {
+  res.json({
+    apiKey: process.env.API_KEY,
+  });
+});
+
 app.post("/select-documents", async (req, res) => {
   const userQuery = req.body.userQuery;
 
