@@ -39,6 +39,7 @@ async function selectDocuments(userQuery) {
 
       Only select the documents that are most relevant to the user's query.
       Select as few documents as possible, a maximum of 6.
+      Always include !!! Bot Orientation !!!.txt.
       Return a JSON object with the following structure:
       {
         "selectedFileNames": ["doc1.txt", "doc3.txt"]
