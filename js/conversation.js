@@ -16,13 +16,12 @@ function sendMessage(message) {
     contentType: "application/json",
     data: JSON.stringify({ userQuery: message }),
     success: function (response) {
-      const { selectedFileNames, selectedFileContents } = response;
+      const { selectedFileNames } = response;
 
-      console.log("Selected Files:", selectedFileNames); // Debugging log
-
+      // Display selected document names under Knowledge Base tab
       const knowledgeBaseTab = $("#knowledge-base");
       knowledgeBaseTab.empty(); // Clear previous content
-      if (selectedFileNames.length > 0) {
+      if (selectedFileNames && selectedFileNames.length > 0) {
         selectedFileNames.forEach((fileName) => {
           knowledgeBaseTab.append(`<li>${fileName}</li>`);
         });
@@ -30,16 +29,21 @@ function sendMessage(message) {
         knowledgeBaseTab.append("<li>No documents selected</li>");
       }
 
-      // Limit user message and context size to stay within token limits
-      const MAX_WORDS = 1500; // Approximate total token limit for context and user input
-      const contextWords = selectedFileContents
-        .split(/\s+/)
-        .slice(0, MAX_WORDS);
-      const truncatedContext = contextWords.join(" ");
-      const userMessageWords = message.split(/\s+/).slice(0, MAX_WORDS / 2);
+      // Step 2: Construct the context from the selected documents
+      const systemPrompt = `
+        The following documents are relevant to the user's query. Use this context to answer the question.
+        Selected documents:
+        ${JSON.stringify(response, null, 2)}
+
+        User's query: "${message}"
+      `;
+
+      // Limit user message size to avoid exceeding token limits
+      const MAX_WORDS = 750; // Approximate limit for the user's message
+      const userMessageWords = message.split(/\s+/).slice(0, MAX_WORDS);
       const truncatedMessage = userMessageWords.join(" ");
 
-      // Step 2: Send the selected context to OpenAI API
+      // Send the structured context and user's query to OpenAI API
       $.ajax({
         url: "https://api.openai.com/v1/chat/completions",
         method: "POST",
@@ -50,8 +54,8 @@ function sendMessage(message) {
         data: JSON.stringify({
           model: "gpt-4",
           messages: [
-            { role: "system", content: truncatedContext }, // Provide knowledge base as the system prompt
-            { role: "user", content: truncatedMessage }, // User's question or query
+            { role: "system", content: systemPrompt },
+            { role: "user", content: truncatedMessage },
           ],
         }),
         success: function (response) {

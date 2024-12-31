@@ -2,12 +2,53 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
+const openai = require("openai");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Enable CORS for all origins
 app.use(cors());
+
+function getAllDocuments() {
+  const directoryPath = path.join(__dirname, "documents"); // Path to the documents folder
+  const files = fs.readdirSync(directoryPath);
+  return files.filter((file) => file.endsWith(".txt")); // You can adjust the filter if needed (e.g., only .txt files)
+}
+
+async function selectDocuments(userQuery) {
+  const documents = getAllDocuments(); // Fetch all available documents
+  const documentList = documents.map((doc) => `- ${doc}`).join("\n"); // Create a formatted list for OpenAI prompt
+
+  const prompt = `
+    You are tasked with selecting the most relevant documents based on the user's query.
+    User's query: "${userQuery}"
+
+    Here is a list of documents:
+    ${documentList}
+
+    Select the documents that are most relevant to the user's query. 
+    Return a JSON object with the following structure:
+    {
+      "selectedFileNames": ["doc1.txt", "doc3.txt"]
+    }
+  `;
+
+  // Send query to OpenAI to process and select documents
+  const response = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: [{ role: "system", content: prompt }],
+  });
+
+  const selectedFileNames = response.choices[0].message.content
+    .split("\n")
+    .filter((name) => name.startsWith("-"))
+    .map((name) => name.trim().slice(2)); // Extract file names from response
+
+  return {
+    selectedFileNames,
+  };
+}
 
 // Serve static files in the "conscious" directory at /files
 app.use("/conscious", express.static(path.join(__dirname, "conscious")));
@@ -83,6 +124,40 @@ app.post("/select-documents", express.json(), (req, res) => {
     });
   });
 });
+
+async function selectDocuments(userQuery) {
+  const documents = getAllDocuments(); // Fetch all available documents
+  const prompt = `
+    You are tasked with selecting the most relevant documents based on the user's query.
+    User's query: "${userQuery}"
+
+    Here is a list of documents:
+    - doc1.txt
+    - doc2.txt
+    - doc3.txt
+
+    Select the documents that are most relevant to the user's query. 
+    Return a JSON object with the following structure:
+    {
+      "selectedFileNames": ["doc1.txt", "doc3.txt"]
+    }
+  `;
+
+  // Send query to OpenAI to process and select documents
+  const response = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: [{ role: "system", content: prompt }],
+  });
+
+  const selectedFileNames = response.choices[0].message.content
+    .split("\n")
+    .filter((name) => name.startsWith("-"))
+    .map((name) => name.trim().slice(2)); // Extract file names from response
+
+  return {
+    selectedFileNames,
+  };
+}
 
 // Serve static files in the "js" directory at /js
 app.use("/js", express.static(path.join(__dirname, "js")));
