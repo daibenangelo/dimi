@@ -17,38 +17,53 @@ function getAllDocuments() {
   return files.filter((file) => file.endsWith(".txt")); // Filter for .txt files
 }
 
+const { selectDocuments } = require("./selectDocuments");
+
+app.use(bodyParser.json());
+
+app.post("/select-documents", async (req, res) => {
+  const userQuery = req.body.userQuery;
+
+  try {
+    // Call the selectDocuments function to get the selected documents based on the query
+    const selectedDocuments = await selectDocuments(userQuery);
+
+    // Send the selected documents back as JSON response
+    res.json(selectedDocuments);
+  } catch (error) {
+    console.error("Error selecting documents:", error);
+    res.status(500).json({ error: "Failed to select documents" });
+  }
+});
+
+// selectDocuments.js (or wherever you define the function)
+const { OpenAI } = require("openai"); // Assuming you are using OpenAI API for document selection
+
 async function selectDocuments(userQuery) {
-  const documents = getAllDocuments(); // Fetch all available documents
-  const documentList = documents.map((doc) => `- ${doc}`).join("\n"); // Create a list of document names
+  // Use OpenAI or any method you prefer to select documents based on userQuery
+  // For example, you can match the query to document names or contents
 
-  // Construct the prompt for OpenAI to select relevant documents
-  const prompt = `
-    You are tasked with selecting the most relevant documents based on the user's query.
-    User's query: "${userQuery}"
+  // Placeholder: Example documents in your knowledge base
+  const documents = [
+    { name: "course-selection.txt", content: "Content about courses" },
+    { name: "enrollment-guide.txt", content: "Content about enrollment" },
+    // Add more documents here...
+  ];
 
-    Here is a list of documents:
-    ${documentList}
+  // Logic to determine which documents are relevant to the query
+  // This is a simplified example, in practice you might use the OpenAI API to match documents
+  const selectedDocuments = documents.filter((doc) =>
+    doc.content.toLowerCase().includes(userQuery.toLowerCase())
+  );
 
-    Based on the query, please select the most relevant documents. 
-    Return the names of the selected documents in a JSON object with the following structure:
-    {
-      "selectedFileNames": ["doc1.txt", "doc3.txt"]
-    }
-  `;
-
-  // Send the prompt to OpenAI for document selection
-  const response = await openai.chat.completions.create({
-    model: "gpt-4",
-    messages: [{ role: "system", content: prompt }],
-  });
-
-  // Parse the response to get selected document names
-  const selectedFileNames = JSON.parse(
-    response.choices[0].message.content
-  ).selectedFileNames;
-
-  return { selectedFileNames };
+  // Return the selected documents
+  return {
+    selectedFileNames: selectedDocuments.map((doc) => doc.name),
+    selectedFileContents: selectedDocuments.map((doc) => doc.content),
+  };
 }
+
+module.exports = { selectDocuments };
 
 // Serve static files in the "conscious" directory at /files
 app.use("/conscious", express.static(path.join(__dirname, "conscious")));

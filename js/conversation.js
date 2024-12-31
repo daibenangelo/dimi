@@ -1,5 +1,4 @@
 let apiKey = ""; // Placeholder for the API Key
-
 const apiUrl = "https://api.openai.com/v1/chat/completions";
 
 function fetchApiKey() {
@@ -33,7 +32,9 @@ function sendMessage(message) {
       const systemPrompt = `
         The following documents are relevant to the user's query. Use this context to answer the question.
         Selected documents:
-        ${JSON.stringify(response, null, 2)}
+        ${selectedFileNames.join(
+          ", "
+        )}  // Use the list of selected file names from the response
 
         User's query: "${message}"
       `;
