@@ -83,7 +83,19 @@ function sendMessage(message) {
 }
 
 function displayMessage(sender, message) {
-  const messageElement = `<div><strong>${sender}:</strong> ${message}</div>`;
+  // Determine the message alignment and styling
+  const isUser = sender === "You";
+  const messageClass = isUser ? "user-message" : "bot-message";
+
+  // Create the message HTML with appropriate styling
+  const messageElement = `
+    <div class="chat-message ${messageClass}">
+      <div class="sender">${sender}</div>
+      <div class="message">${message}</div>
+    </div>
+  `;
+
+  // Append the message to the chat history
   $("#chat-history").append(messageElement);
   $("#chat-history").scrollTop($("#chat-history")[0].scrollHeight);
 }

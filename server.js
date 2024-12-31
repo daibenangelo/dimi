@@ -12,6 +12,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/js", express.static(path.join(__dirname, "js")));
 app.use("/conscious", express.static(path.join(__dirname, "conscious")));
+app.use("/css", express.static(path.join(__dirname, "css")));
 
 // Fetch all document names dynamically
 function getAllDocuments() {
