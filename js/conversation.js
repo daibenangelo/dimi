@@ -15,6 +15,7 @@ function sendMessage(message) {
     contentType: "application/json",
     data: JSON.stringify({ userQuery: message }),
     success: function (response) {
+      console.log(response);
       const { documents } = response;
 
       // Display selected document names under Knowledge Base tab
