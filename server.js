@@ -101,30 +101,32 @@ app.post("/select-documents", async (req, res) => {
   const userQuery = req.body.userQuery.toLowerCase();
 
   try {
-    // Call the selectDocuments function to get the most relevant documents
     const { selectedFileNames } = await selectDocuments(userQuery);
 
     if (selectedFileNames.length === 0) {
-      return res.status(404).json({ error: "No relevant documents found" });
+      // Provide a fallback if no relevant documents are found
+      return res.json({
+        selectedFileNames: [],
+        documents: [
+          {
+            filename: "Fallback.txt",
+            content: "Sorry, no relevant documents were found for your query.",
+          },
+        ],
+      });
     }
 
-    // Read the content of each selected file
-    const folderPath = path.join(__dirname, "conscious");
-    const fileContents = selectedFileNames.map((file) => {
-      const filePath = path.join(folderPath, file);
+    // Read content of selected documents
+    const documents = selectedFileNames.map((file) => {
+      const filePath = path.join(__dirname, "conscious", file);
       const content = fs.readFileSync(filePath, "utf-8");
-      return {
-        filename: file,
-        content: content.trim(), // Ensure there are no extra newlines or spaces
-      };
+      return { filename: file, content };
     });
 
-    res.json({ selectedFileNames, documents: fileContents });
+    res.json({ selectedFileNames, documents });
   } catch (error) {
-    console.error("Error in /select-documents route:", error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while selecting documents" });
+    console.error("Error in /select-documents route:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
