@@ -10,7 +10,6 @@ const PORT = process.env.PORT || 3000;
 // Enable CORS for all origins
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use("/js", express.static(path.join(__dirname, "js")));
 app.use("/conscious", express.static(path.join(__dirname, "conscious")));
 
