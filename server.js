@@ -15,7 +15,7 @@ app.use("/js", express.static(path.join(__dirname, "js")));
 
 // Fetch all document names dynamically
 function getAllDocuments() {
-  const directoryPath = path.join(__dirname, "documents"); // Path to the documents folder
+  const directoryPath = path.join(__dirname, "conscious"); // Correct the path to "conscious" folder
   const files = fs.readdirSync(directoryPath);
   return files.filter((file) => file.endsWith(".txt")); // Filter for .txt files
 }
