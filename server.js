@@ -89,20 +89,39 @@ app.get("/api/env", (req, res) => {
   });
 });
 
-app.post("/select-documents", async (req, res) => {
-  const userQuery = req.body.userQuery;
-
+async function selectDocuments(userQuery) {
   try {
-    // Call the selectDocuments function to get the selected documents based on the query
-    const selectedDocuments = await selectDocuments(userQuery);
+    const documents = getAllDocuments(); // Ensure this is working correctly
+    const prompt = `
+          You are tasked with selecting the most relevant documents based on the user's query.
+          User's query: "${userQuery}"
 
-    // Send the selected documents back as JSON response
-    res.json(selectedDocuments);
+          Here is a list of documents:
+          ${documents.map((doc) => `- ${doc}`).join("\n")}
+
+          Select the documents that are most relevant to the user's query. 
+          Return a JSON object with the following structure:
+          {
+              "selectedFileNames": ["doc1.txt", "doc3.txt"]
+          }
+      `;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [{ role: "system", content: prompt }],
+    });
+
+    const selectedFileNames = response.choices[0].message.content
+      .split("\n")
+      .filter((name) => name.startsWith("-"))
+      .map((name) => name.trim().slice(2));
+
+    return { selectedFileNames };
   } catch (error) {
-    console.error("Error selecting documents:", error);
-    res.status(500).json({ error: "Failed to select documents" });
+    console.error("Error in selectDocuments:", error);
+    throw new Error("Failed to select documents.");
   }
-});
+}
 
 // Serve the index.html file
 app.get("/", (req, res) => {
