@@ -51,6 +51,22 @@ async function selectDocuments(userQuery) {
   };
 }
 
+app.post("/select-documents", async (req, res) => {
+  const { userQuery } = req.body;
+
+  if (!userQuery) {
+    return res.status(400).json({ error: "User query is required." });
+  }
+
+  try {
+    const selectedDocuments = await selectDocuments(userQuery);
+    res.json(selectedDocuments);
+  } catch (error) {
+    console.error("Error selecting documents:", error);
+    res.status(500).json({ error: "Failed to select documents." });
+  }
+});
+
 // Serve static files in the "conscious" directory at /files
 app.get("/files", (req, res) => {
   const query = req.query.query?.toLowerCase() || "";
