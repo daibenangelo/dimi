@@ -37,6 +37,8 @@ function sendMessage(message) {
         User's query: "${message}"
       `;
 
+      console.log(systemPrompt);
+
       // Send the user's query and context to OpenAI API
       $.ajax({
         url: "https://api.openai.com/v1/chat/completions",

@@ -51,6 +51,33 @@ async function selectDocuments(userQuery) {
 }
 
 // Serve static files in the "conscious" directory at /files
+app.get("/files", (req, res) => {
+  const query = req.query.query?.toLowerCase() || "";
+  const folderPath = path.join(__dirname, "conscious"); // Assuming you want to fetch files from "conscious"
+
+  fs.readdir(folderPath, (err, files) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to read directory" });
+    }
+
+    // Filter files by relevance using a basic keyword match
+    const relevantFiles = files.filter((file) => {
+      const fileNameWithoutExtension = file.replace(".txt", "").toLowerCase();
+      return query
+        .split(" ")
+        .some((word) => fileNameWithoutExtension.includes(word));
+    });
+
+    // Map each file to the response format
+    const documents = relevantFiles.map((file) => ({
+      filename: file,
+      desc: file.replace(/\.txt$/, "").replace(/_/g, " "),
+    }));
+
+    res.json(documents);
+  });
+});
+
 app.use("/conscious", express.static(path.join(__dirname, "conscious")));
 
 app.use(express.json());
