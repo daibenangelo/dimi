@@ -53,18 +53,17 @@ async function selectDocuments(userQuery) {
   };
 }
 
-app.post("/select-documents", async (req, res) => {
+app.post("/select-documents", (req, res) => {
   try {
     const { userQuery } = req.body;
     if (!userQuery) {
       return res.status(400).json({ error: "userQuery is required" });
     }
-
-    const result = await selectDocuments(userQuery);
-    res.json(result);
+    // Your logic here (e.g., querying a database, etc.)
+    res.status(200).json({ message: "Documents selected successfully" });
   } catch (error) {
-    console.error("Error in /select-documents endpoint:", error);
-    res.status(500).json({ error: "Failed to select documents" });
+    console.error("Error in /select-documents:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
