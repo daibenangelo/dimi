@@ -32,6 +32,10 @@ function getAllDocuments() {
 async function selectDocuments(userQuery) {
   try {
     const documents = getAllDocuments(); // Fetch all available documents
+
+    // Always include the bot orientation document
+    const mandatoryFile = "!!! Bot Orientation !!!.txt";
+
     const prompt = `
       You are tasked with selecting the most relevant documents based on the user's query.
       User's query: "${userQuery}"
@@ -40,7 +44,6 @@ async function selectDocuments(userQuery) {
       ${documents.map((doc) => `- ${doc}`).join("\n")}
 
       Based on the file names, select the documents that would potentially answer the user's query.
-      Always include !!! Bot Orientation !!!.txt.
       Prioritize documents that directly address the user's query.
       Select the document that is most relevant to the query first, and only include others if absolutely necessary for context or related information.
       Return a JSON object with the following structure:
@@ -77,9 +80,14 @@ async function selectDocuments(userQuery) {
     // Extract the content from the first choice
     const messageContent = response.data.choices[0].message.content;
 
-    // Parse the JSON object returned by OpenAI or handle as a list
+    // Parse the JSON object returned by OpenAI
     const parsedResponse = JSON.parse(messageContent);
-    const selectedFileNames = parsedResponse.selectedFileNames || [];
+    let selectedFileNames = parsedResponse.selectedFileNames || [];
+
+    // Ensure the mandatory file is always included
+    if (!selectedFileNames.includes(mandatoryFile)) {
+      selectedFileNames.unshift(mandatoryFile);
+    }
 
     return { selectedFileNames };
   } catch (error) {
