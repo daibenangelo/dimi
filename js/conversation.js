@@ -29,7 +29,7 @@ function sendMessage(message) {
         knowledgeBaseTab.append("<li>No documents selected</li>");
       }
 
-      // Step 2: Construct the context from the selected documents
+      // Step 2: Construct context from selected documents
       const systemPrompt = `
         The following documents are relevant to the user's query. Use this context to answer the question.
         Selected documents:

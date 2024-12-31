@@ -10,16 +10,18 @@ const PORT = process.env.PORT || 3000;
 // Enable CORS for all origins
 app.use(cors());
 
+// Fetch all document names dynamically
 function getAllDocuments() {
   const directoryPath = path.join(__dirname, "documents"); // Path to the documents folder
   const files = fs.readdirSync(directoryPath);
-  return files.filter((file) => file.endsWith(".txt")); // You can adjust the filter if needed (e.g., only .txt files)
+  return files.filter((file) => file.endsWith(".txt")); // Filter for .txt files
 }
 
 async function selectDocuments(userQuery) {
   const documents = getAllDocuments(); // Fetch all available documents
-  const documentList = documents.map((doc) => `- ${doc}`).join("\n"); // Create a formatted list for OpenAI prompt
+  const documentList = documents.map((doc) => `- ${doc}`).join("\n"); // Create a list of document names
 
+  // Construct the prompt for OpenAI to select relevant documents
   const prompt = `
     You are tasked with selecting the most relevant documents based on the user's query.
     User's query: "${userQuery}"
@@ -27,27 +29,25 @@ async function selectDocuments(userQuery) {
     Here is a list of documents:
     ${documentList}
 
-    Select the documents that are most relevant to the user's query. 
-    Return a JSON object with the following structure:
+    Based on the query, please select the most relevant documents. 
+    Return the names of the selected documents in a JSON object with the following structure:
     {
       "selectedFileNames": ["doc1.txt", "doc3.txt"]
     }
   `;
 
-  // Send query to OpenAI to process and select documents
+  // Send the prompt to OpenAI for document selection
   const response = await openai.chat.completions.create({
     model: "gpt-4",
     messages: [{ role: "system", content: prompt }],
   });
 
-  const selectedFileNames = response.choices[0].message.content
-    .split("\n")
-    .filter((name) => name.startsWith("-"))
-    .map((name) => name.trim().slice(2)); // Extract file names from response
+  // Parse the response to get selected document names
+  const selectedFileNames = JSON.parse(
+    response.choices[0].message.content
+  ).selectedFileNames;
 
-  return {
-    selectedFileNames,
-  };
+  return { selectedFileNames };
 }
 
 // Serve static files in the "conscious" directory at /files
