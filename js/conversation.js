@@ -9,13 +9,16 @@ function fetchApiKey() {
 }
 
 function sendMessage(message) {
+  // Step 1: Select documents based on the user query
   $.ajax({
-    url: "/select-documents",
+    url: "https://dimi-6hqw.onrender.com/select-documents",
     method: "POST",
     contentType: "application/json",
-    data: JSON.stringify({ question: message }),
+    data: JSON.stringify({ userQuery: message }),
     success: function (response) {
-      const { context } = response;
+      const selectedFileContents = response.selectedFileContents;
+
+      // Step 2: Send the selected context to OpenAI API
       $.ajax({
         url: apiUrl,
         method: "POST",
@@ -26,7 +29,7 @@ function sendMessage(message) {
         data: JSON.stringify({
           model: "gpt-4",
           messages: [
-            { role: "system", content: context },
+            { role: "system", content: selectedFileContents },
             { role: "user", content: message },
           ],
         }),
@@ -36,19 +39,25 @@ function sendMessage(message) {
         },
         error: function (xhr, status, error) {
           console.error("Error:", error);
+          console.error("Response:", xhr.responseText);
           displayMessage(
             "Dimi",
-            "Sorry, there was an error. Please try again."
+            "Sorry, there was an error communicating with the AI."
           );
         },
       });
     },
     error: function (xhr, status, error) {
-      console.error("Error fetching documents:", error);
-      displayMessage("Dimi", "Sorry, there was an error selecting documents.");
+      console.error("Error selecting documents:", error);
+      console.error("Response:", xhr.responseText);
+      displayMessage(
+        "Dimi",
+        "Sorry, there was an error selecting the context documents."
+      );
     },
   });
 }
+
 function displayMessage(sender, message) {
   const messageElement = `<div><strong>${sender}:</strong> ${message}</div>`;
   $("#chat-history").append(messageElement);

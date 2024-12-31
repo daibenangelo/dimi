@@ -45,52 +45,31 @@ app.get("/files", (req, res) => {
   });
 });
 
-app.post("/select-documents", express.json(), async (req, res) => {
-  const { question } = req.body;
+app.post("/select-documents", express.json(), (req, res) => {
+  const { userQuery } = req.body;
 
   const folderPath = path.join(__dirname, "conscious");
-  const files = fs.readdirSync(folderPath);
-  const documents = files.map((file) => ({
-    filename: file,
-    content: fs.readFileSync(path.join(folderPath, file), "utf-8"),
-  }));
+  fs.readdir(folderPath, (err, files) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to read directory" });
+    }
 
-  const summaries = documents.map((doc) => ({
-    filename: doc.filename,
-    summary: doc.content.slice(0, 300), // First 300 characters for brevity
-  }));
+    // Use AI to select files based on user query (for now, just matching keywords in filenames)
+    const selectedFiles = files.filter((file) =>
+      userQuery
+        .toLowerCase()
+        .split(" ")
+        .some((keyword) => file.toLowerCase().includes(keyword))
+    );
 
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content: "Select relevant documents based on the user's query.",
-        },
-        {
-          role: "user",
-          content: `Question: ${question}\nDocuments:\n${JSON.stringify(
-            summaries
-          )}`,
-        },
-      ],
-    }),
+    // Read the content of the selected files
+    const selectedFileContents = selectedFiles.map((file) => {
+      const filePath = path.join(folderPath, file);
+      return fs.readFileSync(filePath, "utf-8");
+    });
+
+    res.json({ selectedFileContents: selectedFileContents.join("\n") });
   });
-
-  const data = await response.json();
-  const selectedFilenames = JSON.parse(data.choices[0].message.content);
-
-  const selectedDocuments = documents
-    .filter((doc) => selectedFilenames.includes(doc.filename))
-    .map((doc) => doc.content);
-
-  res.json({ context: selectedDocuments.join("\n") });
 });
 
 // Serve static files in the "js" directory at /js
