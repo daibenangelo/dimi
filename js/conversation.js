@@ -10,31 +10,45 @@ function fetchApiKey() {
 
 function sendMessage(message) {
   $.ajax({
-    url: apiUrl,
+    url: "/select-documents",
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    data: JSON.stringify({
-      model: "gpt-4", // Use "gpt-4-turbo" for the turbo version if desired
-      messages: [
-        { role: "system", content: selectedFileContents },
-        { role: "user", content: message },
-      ],
-    }),
+    contentType: "application/json",
+    data: JSON.stringify({ question: message }),
     success: function (response) {
-      const botMessage = response.choices[0].message.content;
-      displayMessage("Dimi", botMessage);
+      const { context } = response;
+      $.ajax({
+        url: apiUrl,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        data: JSON.stringify({
+          model: "gpt-4",
+          messages: [
+            { role: "system", content: context },
+            { role: "user", content: message },
+          ],
+        }),
+        success: function (response) {
+          const botMessage = response.choices[0].message.content;
+          displayMessage("Dimi", botMessage);
+        },
+        error: function (xhr, status, error) {
+          console.error("Error:", error);
+          displayMessage(
+            "Dimi",
+            "Sorry, there was an error. Please try again."
+          );
+        },
+      });
     },
     error: function (xhr, status, error) {
-      console.error("Error:", error);
-      console.error("Response:", xhr.responseText);
-      displayMessage("Dimi", "Sorry, there was an error. Please try again.");
+      console.error("Error fetching documents:", error);
+      displayMessage("Dimi", "Sorry, there was an error selecting documents.");
     },
   });
 }
-
 function displayMessage(sender, message) {
   const messageElement = `<div><strong>${sender}:</strong> ${message}</div>`;
   $("#chat-history").append(messageElement);

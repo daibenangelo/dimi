@@ -1,0 +1,12 @@
+Statistics Center
+In-Charge: Dr. Raquel Quiambao
+
+The DMMMSU Statistics Center ensures statistical accuracy, data reliability, and validity. It supports quality research for students, faculty, government, and industry clients.
+
+Services Offered:
+Statistical Consultation: A statistician provides one-hour guidance on sample size determination, selecting appropriate statistical tools, and study design.
+Data Organization:
+Labeling (Coding): Formatting data for statistical software.
+Encoding: Entering and editing data in the software.
+Statistical Treatment and Interpretation: Running statistical tools to generate accurate results aligned with research problems and assisting in manuscript preparation, including textual, tabular, and graphical data presentation.
+Verification: Ensures correctness of statistical computations and interpretations for clients conducting their own analysis.
