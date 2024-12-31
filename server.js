@@ -15,9 +15,10 @@ app.use("/js", express.static(path.join(__dirname, "js")));
 
 // Fetch all document names dynamically
 function getAllDocuments() {
-  const directoryPath = path.join(__dirname, "conscious"); // Correct the path to "conscious" folder
+  const directoryPath = path.join(__dirname, "conscious"); // Path to the "conscious" folder
   const files = fs.readdirSync(directoryPath);
-  return files.filter((file) => file.endsWith(".txt")); // Filter for .txt files
+  console.log("Documents in the folder:", files); // Log files to ensure the list is correct
+  return files.filter((file) => file.endsWith(".txt"));
 }
 
 // Use OpenAI API for selecting relevant documents
@@ -56,11 +57,15 @@ async function selectDocuments(userQuery) {
 app.post("/select-documents", async (req, res) => {
   try {
     const userQuery = req.body.userQuery;
+    console.log("User query received:", userQuery); // Log the query
     const selectedDocuments = await selectDocuments(userQuery);
+    console.log("Selected documents:", selectedDocuments); // Log selected documents
     res.json(selectedDocuments);
   } catch (error) {
-    console.error("Error in selectDocuments:", error);
-    res.status(500).json({ error: "An error occurred" });
+    console.error("Error in selectDocuments:", error); // Log the full error
+    res
+      .status(500)
+      .json({ error: "An error occurred while selecting documents" });
   }
 });
 
