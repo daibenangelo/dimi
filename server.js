@@ -38,12 +38,14 @@ async function selectDocuments(userQuery) {
       ${documents.map((doc) => `- ${doc}`).join("\n")}
 
       Based on the file names, select the documents that would potentially answer the user's query.
-      Select as few documents as possible.
       Always include !!! Bot Orientation !!!.txt.
+      Prioritize documents that directly address the user's query.
+      Select the document that is most relevant to the query first, and only include others if absolutely necessary for context or related information.
       Return a JSON object with the following structure:
       {
         "selectedFileNames": ["doc1.txt", "doc3.txt"]
       }
+      Sort the entries by relevance. The most relevant document would be first.
     `;
 
     // Send query to OpenAI API using axios
