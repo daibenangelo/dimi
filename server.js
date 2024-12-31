@@ -9,6 +9,7 @@ const PORT = process.env.PORT || 3000;
 
 // Enable CORS for all origins
 app.use(cors());
+app.use("/js", express.static(path.join(__dirname, "js")));
 
 // Fetch all document names dynamically
 function getAllDocuments() {
