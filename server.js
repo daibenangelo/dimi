@@ -37,8 +37,8 @@ async function selectDocuments(userQuery) {
       Here is a list of documents:
       ${documents.map((doc) => `- ${doc}`).join("\n")}
 
-      Only select the documents that are most relevant to the user's query.
-      Select as few documents as possible, a maximum of 6.
+      Based on the file names, select the documents that would potentially answer the user's query.
+      Select as few documents as possible.
       Always include !!! Bot Orientation !!!.txt.
       Return a JSON object with the following structure:
       {
