@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
-const openai = require("openai");
+const axios = require("axios");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -44,19 +44,32 @@ async function selectDocuments(userQuery) {
       }
     `;
 
-    // Send query to OpenAI to process and select documents
-    const response = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [{ role: "system", content: prompt }],
-    });
+    // Send query to OpenAI API using axios
+    const response = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        model: "gpt-4",
+        messages: [{ role: "system", content: prompt }],
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     // Ensure the response structure is valid
-    if (!response || !response.choices || response.choices.length === 0) {
+    if (
+      !response.data ||
+      !response.data.choices ||
+      response.data.choices.length === 0
+    ) {
       throw new Error("Invalid OpenAI response structure");
     }
 
     // Extract the content from the first choice
-    const messageContent = response.choices[0].message.content;
+    const messageContent = response.data.choices[0].message.content;
 
     // Parse the JSON object returned by OpenAI or handle as a list
     const parsedResponse = JSON.parse(messageContent);
@@ -119,38 +132,6 @@ app.get("/api/env", (req, res) => {
     apiKey: process.env.API_KEY,
   });
 });
-
-async function selectDocuments(userQuery) {
-  const documents = getAllDocuments(); // Fetch all available documents
-  const prompt = `
-    You are tasked with selecting the most relevant documents based on the user's query.
-    User's query: "${userQuery}"
-
-    Here is a list of documents:
-    ${documents.map((doc) => `- ${doc}`).join("\n")}
-
-    Select the documents that are most relevant to the user's query. 
-    Return a JSON object with the following structure:
-    {
-      "selectedFileNames": ["doc1.txt", "doc3.txt"]
-    }
-  `;
-
-  // Send query to OpenAI to process and select documents
-  const response = await openai.chat.completions.create({
-    model: "gpt-4",
-    messages: [{ role: "system", content: prompt }],
-  });
-
-  const selectedFileNames = response.choices[0].message.content
-    .split("\n")
-    .filter((name) => name.startsWith("-"))
-    .map((name) => name.trim().slice(2)); // Extract file names from response
-
-  return {
-    selectedFileNames, // Correctly return the selected file names
-  };
-}
 
 // Serve the index.html file
 app.get("/", (req, res) => {

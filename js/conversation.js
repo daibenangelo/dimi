@@ -40,7 +40,7 @@ function sendMessage(message) {
 
       // Send the user's query and context to OpenAI API
       $.ajax({
-        url: "https://api.openai.com/v1/chat/completions",
+        url: apiUrl,
         method: "POST",
         headers: {
           "Content-Type": "application/json",
