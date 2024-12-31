@@ -1,40 +1,14 @@
-const express = require("express");
-const cors = require("cors");
-const path = require("path");
-const fs = require("fs");
-const axios = require("axios");
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Enable CORS for all origins
-app.use(cors());
-app.use(express.json());
-app.use("/js", express.static(path.join(__dirname, "js")));
-app.use("/conscious", express.static(path.join(__dirname, "conscious")));
-app.use("/css", express.static(path.join(__dirname, "css")));
-
-// Fetch all document names dynamically
-function getAllDocuments() {
-  try {
-    const directoryPath = path.join(__dirname, "conscious");
-    console.log("Reading directory:", directoryPath);
-    const files = fs.readdirSync(directoryPath);
-    console.log("Documents in the folder:", files);
-    return files.filter((file) => file.endsWith(".txt"));
-  } catch (error) {
-    console.error("Error reading documents:", error);
-    throw error; // Re-throw the error for further handling
-  }
-}
-
-// Updated selectDocuments function to be used in the route
 async function selectDocuments(userQuery) {
   try {
     const documents = getAllDocuments(); // Fetch all available documents
 
     // Always include the bot orientation document
     const mandatoryFile = "!!! Bot Orientation !!!.txt";
+
+    // Ensure the mandatory file is included in the document list
+    if (!documents.includes(mandatoryFile)) {
+      documents.unshift(mandatoryFile); // Add it to the beginning of the list
+    }
 
     const prompt = `
       You are tasked with selecting the most relevant documents based on the user's query.
@@ -82,12 +56,7 @@ async function selectDocuments(userQuery) {
 
     // Parse the JSON object returned by OpenAI
     const parsedResponse = JSON.parse(messageContent);
-    let selectedFileNames = parsedResponse.selectedFileNames || [];
-
-    // Ensure the mandatory file is always included
-    if (!selectedFileNames.includes(mandatoryFile)) {
-      selectedFileNames.unshift(mandatoryFile);
-    }
+    const selectedFileNames = parsedResponse.selectedFileNames || [];
 
     return { selectedFileNames };
   } catch (error) {
@@ -95,77 +64,3 @@ async function selectDocuments(userQuery) {
     throw error; // Re-throw the error to be handled by the route
   }
 }
-
-app.post("/select-documents", async (req, res) => {
-  const userQuery = req.body.userQuery.toLowerCase();
-
-  try {
-    // Call the selectDocuments function to get the most relevant documents
-    const { selectedFileNames } = await selectDocuments(userQuery);
-
-    if (selectedFileNames.length === 0) {
-      return res.status(404).json({ error: "No relevant documents found" });
-    }
-
-    // Read the content of each selected file
-    const folderPath = path.join(__dirname, "conscious");
-    const fileContents = selectedFileNames.map((file) => {
-      const filePath = path.join(folderPath, file);
-      const content = fs.readFileSync(filePath, "utf-8");
-      return {
-        filename: file,
-        content: content.trim(), // Ensure there are no extra newlines or spaces
-      };
-    });
-
-    res.json({ selectedFileNames, documents: fileContents });
-  } catch (error) {
-    console.error("Error in /select-documents route:", error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while selecting documents" });
-  }
-});
-
-// Serve static files in the "conscious" directory at /files
-app.get("/files", (req, res) => {
-  const query = req.query.query?.toLowerCase() || "";
-  const folderPath = path.join(__dirname, "conscious"); // Assuming you want to fetch files from "conscious"
-
-  fs.readdir(folderPath, (err, files) => {
-    if (err) {
-      return res.status(500).json({ error: "Failed to read directory" });
-    }
-
-    // Filter files by relevance using a basic keyword match
-    const relevantFiles = files.filter((file) => {
-      const fileNameWithoutExtension = file.replace(".txt", "").toLowerCase();
-      return query
-        .split(" ")
-        .some((word) => fileNameWithoutExtension.includes(word));
-    });
-
-    // Map each file to the response format
-    const documents = relevantFiles.map((file) => ({
-      filename: file,
-      desc: file.replace(/\.txt$/, "").replace(/_/g, " "),
-    }));
-
-    res.json(documents);
-  });
-});
-
-app.get("/api/env", (req, res) => {
-  res.json({
-    apiKey: process.env.API_KEY,
-  });
-});
-
-// Serve the index.html file
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
