@@ -56,7 +56,7 @@ app.post("/select-documents", express.json(), (req, res) => {
       return res.status(500).json({ error: "Failed to read directory" });
     }
 
-    // Select files based on keywords in the user query
+    // Filter files based on user query
     const selectedFiles = files.filter((file) =>
       userQuery
         .toLowerCase()
@@ -64,7 +64,7 @@ app.post("/select-documents", express.json(), (req, res) => {
         .some((keyword) => file.toLowerCase().includes(keyword))
     );
 
-    // Read and combine content of selected files
+    // Read and combine the content of the selected files
     let selectedFileContents = [];
     selectedFiles.forEach((file) => {
       const filePath = path.join(folderPath, file);
@@ -72,13 +72,13 @@ app.post("/select-documents", express.json(), (req, res) => {
       selectedFileContents.push(content);
     });
 
-    // Truncate combined content to fit within the word limit
+    // Combine and truncate contents to fit within the word limit
     const combinedContent = selectedFileContents.join("\n");
     const words = combinedContent.split(/\s+/).slice(0, MAX_WORDS);
     const truncatedContent = words.join(" ");
 
     res.json({
-      selectedFileNames: selectedFiles, // Return names of selected files
+      selectedFileNames: selectedFiles, // Include selected file names
       selectedFileContents: truncatedContent,
     });
   });

@@ -18,15 +18,19 @@ function sendMessage(message) {
     success: function (response) {
       const { selectedFileNames, selectedFileContents } = response;
 
-      // Update the "Knowledge Base" tab with the selected document names
-      const knowledgeBaseList = $("#knowledge-base-list");
-      knowledgeBaseList.empty(); // Clear existing list
-      selectedFileNames.forEach((fileName) => {
-        knowledgeBaseList.append(`<li>${fileName}</li>`);
-      });
+      // Display selected document names under Knowledge Base tab
+      const knowledgeBaseTab = $("#knowledge-base");
+      knowledgeBaseTab.empty(); // Clear previous content
+      if (selectedFileNames.length > 0) {
+        selectedFileNames.forEach((fileName) => {
+          knowledgeBaseTab.append(`<li>${fileName}</li>`);
+        });
+      } else {
+        knowledgeBaseTab.append("<li>No documents selected</li>");
+      }
 
-      // Limit context size to stay within token limits
-      const MAX_WORDS = 1500; // Approximate total token limit
+      // Limit user message and context size to stay within token limits
+      const MAX_WORDS = 1500; // Approximate total token limit for context and user input
       const contextWords = selectedFileContents
         .split(/\s+/)
         .slice(0, MAX_WORDS);
@@ -36,7 +40,7 @@ function sendMessage(message) {
 
       // Step 2: Send the selected context to OpenAI API
       $.ajax({
-        url: apiUrl,
+        url: "https://api.openai.com/v1/chat/completions",
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -45,8 +49,8 @@ function sendMessage(message) {
         data: JSON.stringify({
           model: "gpt-4",
           messages: [
-            { role: "system", content: truncatedContext },
-            { role: "user", content: truncatedMessage },
+            { role: "system", content: truncatedContext }, // Provide knowledge base as the system prompt
+            { role: "user", content: truncatedMessage }, // User's question or query
           ],
         }),
         success: function (response) {
