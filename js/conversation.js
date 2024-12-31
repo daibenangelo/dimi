@@ -18,7 +18,8 @@ function sendMessage(message) {
     success: function (response) {
       const { selectedFileNames, selectedFileContents } = response;
 
-      // Display selected document names under Knowledge Base tab
+      console.log("Selected Files:", selectedFileNames); // Debugging log
+
       const knowledgeBaseTab = $("#knowledge-base");
       knowledgeBaseTab.empty(); // Clear previous content
       if (selectedFileNames.length > 0) {
