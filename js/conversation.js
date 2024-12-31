@@ -28,23 +28,16 @@ function sendMessage(message) {
         knowledgeBaseTab.append("<li>No documents selected</li>");
       }
 
-      // Step 2: Construct context from selected documents
+      // Send the selected documents and user query to OpenAI for an answer
       const systemPrompt = `
         The following documents are relevant to the user's query. Use this context to answer the question.
         Selected documents:
-        ${selectedFileNames.join(
-          ", "
-        )}  // Use the list of selected file names from the response
+        ${JSON.stringify(response, null, 2)}
 
         User's query: "${message}"
       `;
 
-      // Limit user message size to avoid exceeding token limits
-      const MAX_WORDS = 750; // Approximate limit for the user's message
-      const userMessageWords = message.split(/\s+/).slice(0, MAX_WORDS);
-      const truncatedMessage = userMessageWords.join(" ");
-
-      // Send the structured context and user's query to OpenAI API
+      // Send the user's query and context to OpenAI API
       $.ajax({
         url: "https://api.openai.com/v1/chat/completions",
         method: "POST",
@@ -56,7 +49,7 @@ function sendMessage(message) {
           model: "gpt-4",
           messages: [
             { role: "system", content: systemPrompt },
-            { role: "user", content: truncatedMessage },
+            { role: "user", content: message },
           ],
         }),
         success: function (response) {
@@ -65,7 +58,6 @@ function sendMessage(message) {
         },
         error: function (xhr, status, error) {
           console.error("Error:", error);
-          console.error("Response:", xhr.responseText);
           displayMessage(
             "Dimi",
             "Sorry, there was an error communicating with the AI."
@@ -75,7 +67,6 @@ function sendMessage(message) {
     },
     error: function (xhr, status, error) {
       console.error("Error selecting documents:", error);
-      console.error("Response:", xhr.responseText);
       displayMessage(
         "Dimi",
         "Sorry, there was an error selecting the context documents."
