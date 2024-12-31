@@ -19,7 +19,7 @@ app.get("/api/env", (req, res) => {
 });
 
 // Endpoint to retrieve the list of documents in "conscious" folder
-app.get("/files/", (req, res) => {
+app.get("/files", (req, res) => {
   const folderPath = path.join(__dirname, "conscious");
 
   // Read files in the "conscious" folder
