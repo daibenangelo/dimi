@@ -27,11 +27,26 @@ function getAllDocuments() {
   }
 }
 
+// Updated selectDocuments function to be used in the route
 async function selectDocuments(userQuery) {
   try {
     const documents = getAllDocuments(); // Fetch all available documents
     const prompt = `
-      TEST
+      You are tasked with selecting the most relevant documents based on the user's query.
+      User's query: "${userQuery}"
+
+      Here is a list of documents:
+      ${documents.map((doc) => `- ${doc}`).join("\n")}
+
+      Based on the file names, select the documents that would potentially answer the user's query.
+      Always include !!! Bot Orientation !!!.txt.
+      Prioritize documents that directly address the user's query.
+      Select the document that is most relevant to the query first, and only include others if absolutely necessary for context or related information.
+      Return a JSON object with the following structure:
+      {
+        "selectedFileNames": ["doc1.txt", "doc3.txt"]
+      }
+      Sort the entries by relevance. The most relevant document would be first.
     `;
 
     // Send query to OpenAI API using axios
@@ -72,29 +87,20 @@ async function selectDocuments(userQuery) {
   }
 }
 
-app.post("/select-documents", (req, res) => {
+app.post("/select-documents", async (req, res) => {
   const userQuery = req.body.userQuery.toLowerCase();
-  const folderPath = path.join(__dirname, "conscious");
 
-  fs.readdir(folderPath, (err, files) => {
-    if (err) {
-      return res.status(500).json({ error: "Failed to read directory" });
-    }
+  try {
+    // Call the selectDocuments function to get the most relevant documents
+    const { selectedFileNames } = await selectDocuments(userQuery);
 
-    // Filter files by relevance using a basic keyword match
-    const relevantFiles = files.filter((file) => {
-      const fileNameWithoutExtension = file.replace(".txt", "").toLowerCase();
-      return userQuery
-        .split(" ")
-        .some((word) => fileNameWithoutExtension.includes(word));
-    });
-
-    if (relevantFiles.length === 0) {
+    if (selectedFileNames.length === 0) {
       return res.status(404).json({ error: "No relevant documents found" });
     }
 
-    // Read the content of each relevant file
-    const fileContents = relevantFiles.map((file) => {
+    // Read the content of each selected file
+    const folderPath = path.join(__dirname, "conscious");
+    const fileContents = selectedFileNames.map((file) => {
       const filePath = path.join(folderPath, file);
       const content = fs.readFileSync(filePath, "utf-8");
       return {
@@ -103,8 +109,13 @@ app.post("/select-documents", (req, res) => {
       };
     });
 
-    res.json({ selectedFileNames: relevantFiles, documents: fileContents });
-  });
+    res.json({ selectedFileNames, documents: fileContents });
+  } catch (error) {
+    console.error("Error in /select-documents route:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while selecting documents" });
+  }
 });
 
 // Serve static files in the "conscious" directory at /files
