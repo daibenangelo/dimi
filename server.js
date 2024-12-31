@@ -18,24 +18,30 @@ app.get("/api/env", (req, res) => {
   });
 });
 
-// Endpoint to retrieve the list of documents in "conscious" folder
 app.get("/files", (req, res) => {
+  const query = req.query.query?.toLowerCase() || "";
   const folderPath = path.join(__dirname, "conscious");
 
-  // Read files in the "conscious" folder
   fs.readdir(folderPath, (err, files) => {
     if (err) {
       return res.status(500).json({ error: "Failed to read directory" });
     }
 
-    // Map each file to an object with filename, description, and default status
-    const documents = files.map((file) => ({
+    // Filter files by relevance using a basic keyword match
+    const relevantFiles = files.filter((file) => {
+      const fileNameWithoutExtension = file.replace(".txt", "").toLowerCase();
+      return query
+        .split(" ")
+        .some((word) => fileNameWithoutExtension.includes(word));
+    });
+
+    // Map each file to the response format
+    const documents = relevantFiles.map((file) => ({
       filename: file,
-      desc: file.replace(/\.txt$/, "").replace(/_/g, " "), // Remove ".txt" and replace underscores with spaces
-      def: true,
+      desc: file.replace(/\.txt$/, "").replace(/_/g, " "),
     }));
 
-    res.json(documents); // Send the array of documents as JSON
+    res.json(documents);
   });
 });
 

@@ -52,69 +52,26 @@ $(document).ready(function () {
     });
   }
 
-  // Function to display the content of all selected files
-  function displaySelectedFilesContent() {
-    const contentContainer = $("#file-content");
-    contentContainer.empty(); // Clear the previous content
+  async function getRelevantDocuments(userInput) {
+    try {
+      const response = await $.getJSON(
+        `/files?query=${encodeURIComponent(userInput)}`
+      );
+      selectedFileContents = ""; // Reset selected contents
 
-    // Display the concatenated content of all selected files
-    contentContainer.append(
-      "<p>" + selectedFileContents.replace(/\n/g, "<br>") + "</p>"
-    );
+      for (const doc of response) {
+        const fileContent = await fetchFileContent(doc.filename);
+        selectedFileContents += fileContent + "\n"; // Append content
+      }
+    } catch (error) {
+      console.error("Error fetching relevant documents:", error);
+    }
   }
 
-  // Load the list of checked documents from localStorage, or fall back to the default if none is saved
-  const savedCheckedDocuments =
-    JSON.parse(localStorage.getItem("checkedDocuments")) || [];
-
-  // Initialize checkboxes based on the documents JSON
-  documents.forEach(function (doc) {
-    let isChecked;
-
-    // If there are saved checked documents, use them
-    if (savedCheckedDocuments.length > 0) {
-      isChecked = savedCheckedDocuments.includes(doc.filename);
-    } else {
-      // Otherwise, set default checked state for the specific documents
-      isChecked = defaultSelectedFiles.includes(doc.filename);
-    }
-
-    let checkbox = $("<input />", {
-      type: "checkbox",
-      id: doc.filename,
-      class: "file-checkbox form-check-input",
-      value: doc.filename,
-      checked: isChecked,
+  async function fetchFileContent(fileName) {
+    return $.ajax({
+      url: `/conscious/${fileName}`,
+      method: "GET",
     });
-
-    let label = $("<label />", {
-      for: doc.filename,
-      text: doc.desc,
-    });
-
-    $("#checkbox-container").append(checkbox).append(label).append("<br>");
-
-    // Load initial content if checkbox is checked
-    if (isChecked) {
-      loadFileContent(doc.filename, true);
-    }
-  });
-
-  // Save the list of checked documents to localStorage
-  function saveCheckedDocuments() {
-    const checkedDocuments = $(".file-checkbox:checked")
-      .map(function () {
-        return this.value;
-      })
-      .get();
-    localStorage.setItem("checkedDocuments", JSON.stringify(checkedDocuments));
   }
-
-  // Handle checkbox change events
-  $(".file-checkbox").on("change", function () {
-    const fileName = $(this).val();
-    const addWords = $(this).is(":checked");
-    loadFileContent(fileName, addWords);
-    saveCheckedDocuments(); // Save to localStorage whenever a checkbox is changed
-  });
 });
