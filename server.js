@@ -72,6 +72,7 @@ async function selectDocuments(userQuery) {
 
 app.post("/select-documents", async (req, res) => {
   try {
+    console.log("YO");
     const userQuery = req.body.userQuery;
     console.log("User query received:", userQuery); // Log the query
     const selectedDocuments = await selectDocuments(userQuery);
