@@ -90,8 +90,8 @@ function displayMessage(sender, message) {
 
 $(document).ready(function () {
   displayMessage(
-    "Hi! I am Dimi, the Don Mariano Marcos Memorial State University (DMMMSU) chatbot. What can I help you with?",
-    "Dimi"
+    "Dimi",
+    "Hi! I am Dimi, the Don Mariano Marcos Memorial State University (DMMMSU) chatbot. What can I help you with?"
   );
   // Fetch API key once the document is ready
   fetchApiKey().then(function () {
