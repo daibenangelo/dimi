@@ -48,6 +48,7 @@ async function selectDocuments(userQuery) {
       Here is a list of documents:
       ${documents.map((doc) => `- ${doc}`).join("\n")}
 
+      Note: Always include the document "!!! Bot Orientation !!!.txt" as part of the selected documents, regardless of the query.
       Based on the file names, select the documents that would potentially answer the user's query.
       Prioritize documents that directly address the user's query.
       Select the document that is most relevant to the query first, and only include others if absolutely necessary for context or related information.
