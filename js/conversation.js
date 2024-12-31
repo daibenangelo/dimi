@@ -16,7 +16,23 @@ function sendMessage(message) {
     contentType: "application/json",
     data: JSON.stringify({ userQuery: message }),
     success: function (response) {
-      const selectedFileContents = response.selectedFileContents;
+      const { selectedFileNames, selectedFileContents } = response;
+
+      // Update the "Knowledge Base" tab with the selected document names
+      const knowledgeBaseList = $("#knowledge-base-list");
+      knowledgeBaseList.empty(); // Clear existing list
+      selectedFileNames.forEach((fileName) => {
+        knowledgeBaseList.append(`<li>${fileName}</li>`);
+      });
+
+      // Limit context size to stay within token limits
+      const MAX_WORDS = 1500; // Approximate total token limit
+      const contextWords = selectedFileContents
+        .split(/\s+/)
+        .slice(0, MAX_WORDS);
+      const truncatedContext = contextWords.join(" ");
+      const userMessageWords = message.split(/\s+/).slice(0, MAX_WORDS / 2);
+      const truncatedMessage = userMessageWords.join(" ");
 
       // Step 2: Send the selected context to OpenAI API
       $.ajax({
@@ -29,8 +45,8 @@ function sendMessage(message) {
         data: JSON.stringify({
           model: "gpt-4",
           messages: [
-            { role: "system", content: selectedFileContents },
-            { role: "user", content: message },
+            { role: "system", content: truncatedContext },
+            { role: "user", content: truncatedMessage },
           ],
         }),
         success: function (response) {

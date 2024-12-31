@@ -48,13 +48,15 @@ app.get("/files", (req, res) => {
 app.post("/select-documents", express.json(), (req, res) => {
   const { userQuery } = req.body;
 
+  const MAX_WORDS = 1500; // Limit context to approximately 1500 words.
   const folderPath = path.join(__dirname, "conscious");
+
   fs.readdir(folderPath, (err, files) => {
     if (err) {
       return res.status(500).json({ error: "Failed to read directory" });
     }
 
-    // Use AI to select files based on user query (for now, just matching keywords in filenames)
+    // Select files based on keywords in the user query
     const selectedFiles = files.filter((file) =>
       userQuery
         .toLowerCase()
@@ -62,13 +64,23 @@ app.post("/select-documents", express.json(), (req, res) => {
         .some((keyword) => file.toLowerCase().includes(keyword))
     );
 
-    // Read the content of the selected files
-    const selectedFileContents = selectedFiles.map((file) => {
+    // Read and combine content of selected files
+    let selectedFileContents = [];
+    selectedFiles.forEach((file) => {
       const filePath = path.join(folderPath, file);
-      return fs.readFileSync(filePath, "utf-8");
+      const content = fs.readFileSync(filePath, "utf-8");
+      selectedFileContents.push(content);
     });
 
-    res.json({ selectedFileContents: selectedFileContents.join("\n") });
+    // Truncate combined content to fit within the word limit
+    const combinedContent = selectedFileContents.join("\n");
+    const words = combinedContent.split(/\s+/).slice(0, MAX_WORDS);
+    const truncatedContent = words.join(" ");
+
+    res.json({
+      selectedFileNames: selectedFiles, // Return names of selected files
+      selectedFileContents: truncatedContent,
+    });
   });
 });
 
