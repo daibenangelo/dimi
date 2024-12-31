@@ -33,10 +33,9 @@ function sendMessage(message) {
         The following documents are relevant to the user's query. Use this context to answer the question.
         Selected documents:
         ${JSON.stringify(response, null, 2)}
-
+  
         User's query: "${message}"
       `;
-
       console.log(systemPrompt);
 
       // Send the user's query and context to OpenAI API

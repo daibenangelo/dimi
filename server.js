@@ -53,17 +53,14 @@ async function selectDocuments(userQuery) {
   };
 }
 
-app.post("/select-documents", (req, res) => {
+app.post("/select-documents", async (req, res) => {
   try {
-    const { userQuery } = req.body;
-    if (!userQuery) {
-      return res.status(400).json({ error: "userQuery is required" });
-    }
-    // Your logic here (e.g., querying a database, etc.)
-    res.status(200).json({ message: "Documents selected successfully" });
+    const userQuery = req.body.userQuery;
+    const selectedDocuments = await selectDocuments(userQuery);
+    res.json(selectedDocuments);
   } catch (error) {
-    console.error("Error in /select-documents:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error in selectDocuments:", error);
+    res.status(500).json({ error: "An error occurred" });
   }
 });
 
@@ -106,37 +103,35 @@ app.get("/api/env", (req, res) => {
 });
 
 async function selectDocuments(userQuery) {
-  try {
-    const documents = getAllDocuments(); // Ensure this is working correctly
-    const prompt = `
-          You are tasked with selecting the most relevant documents based on the user's query.
-          User's query: "${userQuery}"
+  const documents = getAllDocuments(); // Fetch all available documents
+  const prompt = `
+    You are tasked with selecting the most relevant documents based on the user's query.
+    User's query: "${userQuery}"
 
-          Here is a list of documents:
-          ${documents.map((doc) => `- ${doc}`).join("\n")}
+    Here is a list of documents:
+    ${documents.map((doc) => `- ${doc}`).join("\n")}
 
-          Select the documents that are most relevant to the user's query. 
-          Return a JSON object with the following structure:
-          {
-              "selectedFileNames": ["doc1.txt", "doc3.txt"]
-          }
-      `;
+    Select the documents that are most relevant to the user's query. 
+    Return a JSON object with the following structure:
+    {
+      "selectedFileNames": ["doc1.txt", "doc3.txt"]
+    }
+  `;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [{ role: "system", content: prompt }],
-    });
+  // Send query to OpenAI to process and select documents
+  const response = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: [{ role: "system", content: prompt }],
+  });
 
-    const selectedFileNames = response.choices[0].message.content
-      .split("\n")
-      .filter((name) => name.startsWith("-"))
-      .map((name) => name.trim().slice(2));
+  const selectedFileNames = response.choices[0].message.content
+    .split("\n")
+    .filter((name) => name.startsWith("-"))
+    .map((name) => name.trim().slice(2)); // Extract file names from response
 
-    return { selectedFileNames };
-  } catch (error) {
-    console.error("Error in selectDocuments:", error);
-    throw new Error("Failed to select documents.");
-  }
+  return {
+    selectedFileNames, // Correctly return the selected file names
+  };
 }
 
 // Serve the index.html file
