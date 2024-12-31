@@ -23,6 +23,7 @@ function sendMessage(message) {
       if (documents && documents.length > 0) {
         documents.forEach((doc) => {
           knowledgeBaseTab.append(`<li>${doc.filename}</li>`);
+          console.log(doc.filename);
         });
       } else {
         knowledgeBaseTab.append("<li>No documents selected</li>");
@@ -38,7 +39,6 @@ function sendMessage(message) {
   
         User's query: "${message}"
       `;
-      console.log(systemPrompt);
 
       // Send the user's query and context to OpenAI API
       $.ajax({
