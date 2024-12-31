@@ -15,24 +15,26 @@ function sendMessage(message) {
     contentType: "application/json",
     data: JSON.stringify({ userQuery: message }),
     success: function (response) {
-      const { selectedFileNames } = response;
+      const { documents } = response;
 
       // Display selected document names under Knowledge Base tab
       const knowledgeBaseTab = $("#knowledge-base");
       knowledgeBaseTab.empty(); // Clear previous content
-      if (selectedFileNames && selectedFileNames.length > 0) {
-        selectedFileNames.forEach((fileName) => {
-          knowledgeBaseTab.append(`<li>${fileName}</li>`);
+      if (documents && documents.length > 0) {
+        documents.forEach((doc) => {
+          knowledgeBaseTab.append(`<li>${doc.filename}</li>`);
         });
       } else {
         knowledgeBaseTab.append("<li>No documents selected</li>");
       }
 
-      // Send the selected documents and user query to OpenAI for an answer
+      // Prepare the system prompt using document content
       const systemPrompt = `
         The following documents are relevant to the user's query. Use this context to answer the question.
-        Selected documents:
-        ${JSON.stringify(response, null, 2)}
+        Documents:
+        ${documents
+          .map((doc) => `\n${doc.filename}:\n${doc.content}`)
+          .join("\n")}
   
         User's query: "${message}"
       `;

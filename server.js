@@ -82,21 +82,39 @@ async function selectDocuments(userQuery) {
   }
 }
 
-app.post("/select-documents", async (req, res) => {
-  try {
-    console.log("YO");
-    const userQuery = req.body.userQuery;
-    console.log("User query received:", userQuery); // Log the query
-    const selectedDocuments = await selectDocuments(userQuery);
-    console.log("Selected documents:", selectedDocuments); // Log selected documents
-    res.json(selectedDocuments);
-  } catch (error) {
-    console.error("Error in /select-documents:", error); // Log the full error details
-    res.status(500).json({
-      error: "An error occurred while selecting documents",
-      details: error.message,
+app.post("/select-documents", (req, res) => {
+  const userQuery = req.body.userQuery.toLowerCase();
+  const folderPath = path.join(__dirname, "conscious");
+
+  fs.readdir(folderPath, (err, files) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to read directory" });
+    }
+
+    // Filter files by relevance using a basic keyword match
+    const relevantFiles = files.filter((file) => {
+      const fileNameWithoutExtension = file.replace(".txt", "").toLowerCase();
+      return userQuery
+        .split(" ")
+        .some((word) => fileNameWithoutExtension.includes(word));
     });
-  }
+
+    if (relevantFiles.length === 0) {
+      return res.status(404).json({ error: "No relevant documents found" });
+    }
+
+    // Read the content of each relevant file
+    const fileContents = relevantFiles.map((file) => {
+      const filePath = path.join(folderPath, file);
+      const content = fs.readFileSync(filePath, "utf-8");
+      return {
+        filename: file,
+        content: content.trim(), // Ensure there are no extra newlines or spaces
+      };
+    });
+
+    res.json({ selectedFileNames: relevantFiles, documents: fileContents });
+  });
 });
 
 // Serve static files in the "conscious" directory at /files
