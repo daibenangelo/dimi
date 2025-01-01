@@ -5,6 +5,7 @@
   background-color: #f9f9f9;
   border: 1px solid #ddd;
   border-radius: 5px;
+  width: 100%; /* Ensure full width */
 }
 
 .chat-message {
@@ -57,45 +58,19 @@
   }
 }
 
-/* Hide the title and tabs on small screens */
+/* Responsive Design for Small Screens */
 @media (max-width: 576px) {
   h1.display-3,
   .nav-tabs {
     display: none;
   }
 
-  .chat-message {
-    max-width: 100%; /* Allow full width on small screens */
-    flex-grow: 1; /* Let messages stretch to fill available space */
+  #chat-history {
+    max-height: calc(100vh - 150px); /* Adjust for smaller headers */
   }
-}
 
-/* Chat box styling */
-#chat-history {
-  max-height: calc(100vh - 200px); /* Adjusts based on screen size */
-  overflow-y: auto;
-  padding: 10px;
-  background-color: #f9f9f9;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-}
-
-/* Default chat message styles */
-.chat-message {
-  margin: 10px 0;
-  padding: 10px;
-  border-radius: 10px;
-  background-color: #e8e8e8;
-  word-wrap: break-word;
-  line-height: 1.5;
-  max-width: 70%; /* Default width for larger screens */
-}
-
-.user-message {
-  align-self: flex-end;
-  background-color: #d1f7d6;
-}
-
-.bot-message {
-  align-self: flex-start;
+  .chat-message {
+    max-width: 100% !important; /* Full width */
+    flex-grow: 1; /* Stretch to fill container */
+  }
 }
