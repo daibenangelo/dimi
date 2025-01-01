@@ -12,6 +12,9 @@
   display: flex;
   flex-direction: column;
   max-width: 70%;
+  opacity: 0;
+  transform: scale(0.95);
+  animation: pop-in 0.3s forwards ease-in-out;
 }
 
 .user-message {
@@ -40,4 +43,16 @@
   word-wrap: break-word;
   white-space: pre-wrap;
   line-height: 1.5;
+}
+
+/* Keyframes for the pop-in animation */
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

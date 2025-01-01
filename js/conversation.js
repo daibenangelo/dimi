@@ -87,16 +87,34 @@ function displayMessage(sender, message) {
   const isUser = sender === "You";
   const messageClass = isUser ? "user-message" : "bot-message";
 
-  // Create the message HTML with appropriate styling
-  const messageElement = `
+  // Create the message container
+  const messageContainer = $(`
     <div class="chat-message ${messageClass}">
       <div class="sender">${sender}</div>
-      <div class="message">${message}</div>
+      <div class="message"></div>
     </div>
-  `;
+  `);
 
-  // Append the message to the chat history
-  $("#chat-history").append(messageElement);
+  // Append the container to the chat history
+  $("#chat-history").append(messageContainer);
+
+  // Animate the chat message popping in
+  messageContainer.hide().fadeIn(300);
+
+  // Animate text appearance one letter at a time
+  const messageElement = messageContainer.find(".message");
+  let index = 0;
+
+  function typeText() {
+    if (index < message.length) {
+      messageElement.append(message[index]);
+      index++;
+      setTimeout(typeText, 30); // Adjust typing speed (30ms per letter)
+    }
+  }
+  typeText();
+
+  // Scroll to the latest message
   $("#chat-history").scrollTop($("#chat-history")[0].scrollHeight);
 }
 
