@@ -65,7 +65,12 @@
   }
 
   .chat-message {
-    max-width: 100%; /* Full width on small screens */
+    max-width: 100%; /* Allow full width on small screens */
+    flex-grow: 1; /* Let messages stretch to fill available space */
+  }
+
+  #chat-history {
+    max-height: calc(100vh - 150px); /* Adjust for smaller screen sizes */
   }
 }
 
