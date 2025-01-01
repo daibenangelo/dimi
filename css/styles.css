@@ -63,6 +63,10 @@
   .nav-tabs {
     display: none;
   }
+
+  .chat-message {
+    max-width: 100%; /* Full width on small screens */
+  }
 }
 
 /* Chat box styling */
@@ -75,27 +79,22 @@
   border-radius: 5px;
 }
 
-/* Ensure input box grows dynamically */
-#user-input {
-  resize: none;
-  height: auto;
-  overflow-y: hidden; /* Prevent scrollbar until necessary */
-}
-
-/* For dynamic chat message heights */
+/* Default chat message styles */
 .chat-message {
   margin: 10px 0;
   padding: 10px;
   border-radius: 10px;
   background-color: #e8e8e8;
-  max-width: 70%;
   word-wrap: break-word;
   line-height: 1.5;
+  max-width: 70%; /* Default width for larger screens */
 }
+
 .user-message {
   align-self: flex-end;
   background-color: #d1f7d6;
 }
+
 .bot-message {
   align-self: flex-start;
 }

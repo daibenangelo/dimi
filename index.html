@@ -92,11 +92,12 @@
             this.style.height = this.scrollHeight + "px"; // Adjust to scrollHeight
           });
 
-          // Ensure chat history scrolls to the bottom when updated
-          const chatHistory = $("#chat-history");
-          chatHistory.on("DOMNodeInserted", function () {
-            chatHistory.scrollTop(chatHistory[0].scrollHeight);
+          // Auto-scroll chat history using MutationObserver
+          const chatHistory = document.getElementById("chat-history");
+          const observer = new MutationObserver(() => {
+            chatHistory.scrollTop = chatHistory.scrollHeight;
           });
+          observer.observe(chatHistory, { childList: true });
         });
 
         async function loadDocumentsAndScripts() {
