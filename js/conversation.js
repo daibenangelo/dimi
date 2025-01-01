@@ -109,7 +109,7 @@ function displayMessage(sender, message) {
     if (index < message.length) {
       messageElement.append(message[index]);
       index++;
-      setTimeout(typeText, 30); // Adjust typing speed (30ms per letter)
+      setTimeout(typeText, 10); // Adjust typing speed (30ms per letter)
     }
   }
   typeText();
