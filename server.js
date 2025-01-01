@@ -56,6 +56,7 @@ async function selectDocuments(userQuery) {
       {
         "selectedFileNames": ["doc1.txt", "doc3.txt"]
       }
+      Always return a JSON object with no exceptions. Do not include any other text.
       Sort the entries by relevance. The most relevant document would be first.
     `;
 
