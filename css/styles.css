@@ -56,3 +56,46 @@
     transform: scale(1);
   }
 }
+
+/* Hide the title and tabs on small screens */
+@media (max-width: 576px) {
+  h1.display-3,
+  .nav-tabs {
+    display: none;
+  }
+}
+
+/* Chat box styling */
+#chat-history {
+  max-height: calc(100vh - 200px); /* Adjusts based on screen size */
+  overflow-y: auto;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+/* Ensure input box grows dynamically */
+#user-input {
+  resize: none;
+  height: auto;
+  overflow-y: hidden; /* Prevent scrollbar until necessary */
+}
+
+/* For dynamic chat message heights */
+.chat-message {
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: #e8e8e8;
+  max-width: 70%;
+  word-wrap: break-word;
+  line-height: 1.5;
+}
+.user-message {
+  align-self: flex-end;
+  background-color: #d1f7d6;
+}
+.bot-message {
+  align-self: flex-start;
+}

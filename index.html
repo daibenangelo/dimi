@@ -85,6 +85,20 @@
       </div>
 
       <script>
+        $(document).ready(function () {
+          // Automatically adjust textarea height based on content
+          $("#user-input").on("input", function () {
+            this.style.height = "auto"; // Reset the height
+            this.style.height = this.scrollHeight + "px"; // Adjust to scrollHeight
+          });
+
+          // Ensure chat history scrolls to the bottom when updated
+          const chatHistory = $("#chat-history");
+          chatHistory.on("DOMNodeInserted", function () {
+            chatHistory.scrollTop(chatHistory[0].scrollHeight);
+          });
+        });
+
         async function loadDocumentsAndScripts() {
           try {
             // Fetch documents
