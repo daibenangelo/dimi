@@ -1,0 +1,23 @@
+ADMISSION PROCESS - EXAMINATIONS and GRADES
+
+UNDERGRADUATE
+1.00: 98-100 (A+)
+1.25: 95-97 (A)
+1.50: 92-94 (A-)
+1.75: 89-91 (B+)
+2.00: 86-88 (B)
+2.25: 83-85 (B-)
+2.50: 80-82 (C+)
+2.75: 77-79 (C)
+3.00: 75-76 (C-)
+5.00: Failure
+INC: Incomplete
+D: Dropped
+
+GRADUATE (Master's/Doctoral)
+1.00: 98-100 (A+, Excellent)
+1.25: 95-97 (A, Very Good)
+1.50: 92-94 (A-, Good)
+1.75: 89-91 (B+, Satisfactory)
+2.00: 86-88 (B, Passed)
+5.00: ≤85 (F, Failed)

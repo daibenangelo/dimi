@@ -1,0 +1,23 @@
+CURRICULAR PROGRAM PLACEMENT
+
+First Year:
+4-Year Programs: Enrolled/completed ≤25% of required units.
+5-Year Programs: Enrolled/completed ≤20% of required units.
+
+Second Year:
+4-Year Programs: Completed 1st year or 25–50% of required units.
+5-Year Programs: Completed 1st year or 20–40% of required units.
+
+Third Year:
+4-Year Programs: Completed 2 years or 50–75% of required units.
+5-Year Programs: Completed 2 years or 40–60% of required units.
+
+Fourth Year:
+4-Year Programs: Completed 3 years or >75% of required units, not yet graduated.
+5-Year Programs: Completed 3 years or 60–80% of required units.
+
+Fifth Year:
+5-Year Programs: Completed 4 years or >80% of required units, not yet graduated.
+
+Sixth Year:
+Completed 5 years.
