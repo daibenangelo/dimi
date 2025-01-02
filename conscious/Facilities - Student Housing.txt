@@ -1,0 +1,12 @@
+Student Housing includes the following dormitories:
+
+IPIL Residence Hall: 1350 sq.m.
+IMELDA Residence Hall: 700 sq.m.
+NLUC Male Dormitory: 630 sq.m.
+ILANG-ILANG Ladies Dormitory: 630 sq.m.
+SLUC-Agoo Ladies Dormitory (Consolacion, Agoo, La Union): 926 sq.m.
+SLUC-ST Ladies Dormitory (Ubagan, Sto. Tomas, La Union): 177.04 sq.m.
+SLUC-Agoo Men’s Dormitory (Consolacion, Agoo, La Union): 828 sq.m.
+SLUC-ST Men’s Dormitory (Ubagan, Sto. Tomas, La Union): 177.04 sq.m.
+SLUC-Rosario Men’s Dormitory (Nagtagaan, Rosario, La Union): 177.04 sq.m.
+MLUC Ladies Dormitory (Catbangen, San Fernando, La Union): 400 sq.m.
