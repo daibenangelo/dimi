@@ -81,40 +81,90 @@ function sendMessage(message) {
   });
 }
 
-function displayMessage(sender, message) {
-  // Determine the message alignment and styling
-  const isUser = sender === "You";
-  const messageClass = isUser ? "user-message" : "bot-message";
-
-  // Create the message container
-  const messageContainer = $(`
-    <div class="chat-message ${messageClass}">
-      <div class="sender">${sender}</div>
-      <div class="message"></div>
+function showLoading() {
+  // Add a loading indicator to the chat
+  const loadingIndicator = $(`
+    <div id="loading-indicator" class="chat-message bot-message">
+      <div class="sender">Dimi</div>
+      <div class="message">...</div>
     </div>
   `);
-
-  // Append the container to the chat history
-  $("#chat-history").append(messageContainer);
-
-  // Animate the chat message popping in
-  messageContainer.hide().fadeIn(300);
-
-  // Animate text appearance one letter at a time
-  const messageElement = messageContainer.find(".message");
-  let index = 0;
-
-  function typeText() {
-    if (index < message.length) {
-      messageElement.append(message[index]);
-      index++;
-      setTimeout(typeText, 10); // Adjust typing speed (30ms per letter)
-    }
-  }
-  typeText();
-
-  // Scroll to the latest message
+  $("#chat-history").append(loadingIndicator);
   $("#chat-history").scrollTop($("#chat-history")[0].scrollHeight);
+}
+
+function hideLoading() {
+  // Remove the loading indicator
+  $("#loading-indicator").remove();
+}
+
+function sendMessage(message) {
+  // Show the loading indicator
+  showLoading();
+
+  $.ajax({
+    url: "https://dimi-6hqw.onrender.com/select-documents",
+    method: "POST",
+    contentType: "application/json",
+    data: JSON.stringify({ userQuery: message }),
+    success: function (response) {
+      const { documents } = response;
+
+      const knowledgeBaseTab = $("#knowledge-base");
+      knowledgeBaseTab.empty();
+      if (documents && documents.length > 0) {
+        documents.forEach((doc) => {
+          knowledgeBaseTab.append(`<li>${doc.filename}</li>`);
+        });
+      } else {
+        knowledgeBaseTab.append("<li>No documents selected</li>");
+      }
+
+      const systemPrompt = `
+        The following documents are relevant to the user's query. Use this context to answer the question.
+        Documents:
+        ${documents
+          .map((doc) => `\n${doc.filename}:\n${doc.content}`)
+          .join("\n")}
+        User's query: "${message}"
+      `;
+
+      $.ajax({
+        url: apiUrl,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        data: JSON.stringify({
+          model: "gpt-4",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: message },
+          ],
+        }),
+        success: function (response) {
+          hideLoading(); // Hide the loading indicator
+          const botMessage = response.choices[0].message.content;
+          displayMessage("Dimi", botMessage);
+        },
+        error: function (xhr, status, error) {
+          hideLoading(); // Hide the loading indicator
+          displayMessage(
+            "Dimi",
+            "Sorry, there was an error communicating with the AI."
+          );
+        },
+      });
+    },
+    error: function (xhr, status, error) {
+      hideLoading(); // Hide the loading indicator
+      displayMessage(
+        "Dimi",
+        "Sorry, there was an error selecting the context documents."
+      );
+    },
+  });
 }
 
 $(document).ready(function () {

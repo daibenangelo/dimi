@@ -110,7 +110,7 @@ app.post("/select-documents", async (req, res) => {
         selectedFileNames: [],
         documents: [
           {
-            filename: "Fallback.txt",
+            filename: "fallback.txt",
             content: "Sorry, no relevant documents were found for your query.",
           },
         ],
