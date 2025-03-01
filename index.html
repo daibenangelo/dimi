@@ -3,13 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DMMMSU-MLUC AI Chatbot</title>
+    <title>Dimi, the DMMMSU AI Chatbot</title>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
       integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
       crossorigin="anonymous"
     />
+    <link href="/css/styles.css" rel="stylesheet" />
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
@@ -21,7 +22,7 @@
     <div class="container my-2">
       <div class="row">
         <div class="col-12 text-center mb-4">
-          <h1 class="display-3">DMMMSU-MLUC AI Chatbot</h1>
+          <h1 class="display-3">DMMMSU AI Chatbot</h1>
         </div>
       </div>
       <!-- Toggle Button for Knowledge Base -->
@@ -69,35 +70,29 @@
         <div class="tab-content mt-3" id="myTabContent">
           <div class="tab-pane fade show active" id="chat" role="tabpanel">
             <h2>Talk with Dimi</h2>
-            <div class="row mb-1">
-              <!-- Input Field -->
-              <div class="col-9">
-                <input
-                  type="textarea"
-                  id="user-input"
-                  class="form-control"
-                  placeholder="Ask me about the DMMMSU-MLUC..."
-                />
-              </div>
-              <!-- Button -->
-              <div class="col-3">
-                <button id="send-btn" class="btn btn-primary btn-block">
-                  Send
-                </button>
+            <div class="row">
+              <div class="col-12">
+                <div class="input-group">
+                  <textarea
+                    id="user-input"
+                    class="form-control"
+                    placeholder="Ask me about the DMMMSU-MLUC..."
+                    rows="1"
+                    aria-label="Chat input"
+                  ></textarea>
+                  <div class="input-group-text">
+                    <button id="send-btn" class="btn btn-primary">Send</button>
+                  </div>
+                </div>
               </div>
             </div>
             <div id="chat-history"></div>
           </div>
           <div class="tab-pane fade" id="kb" role="tabpanel">
-            <!-- Collapsible Knowledge Base Section -->
-            <div id="knowledge-base-section">
-              <p id="total-words"></p>
-              <p id="estimated-tokens"></p>
-              <!-- <div id="file-content"></div> -->
-            </div>
+            <h3>Knowledge Base</h3>
+            <ul id="knowledge-base"></ul>
           </div>
-        </div>
-        <div class="tab-pane fade" id="test" role="tabpanel">
+          <div class="tab-pane fade" id="test" role="tabpanel">
             <!-- Collapsible Knowledge Base Section -->
             <div id="testing-section">
               <p id="user-prompt"></p>
@@ -109,6 +104,21 @@
       </div>
 
       <script>
+        $(document).ready(function () {
+          // Automatically adjust textarea height based on content
+          $("#user-input").on("input", function () {
+            this.style.height = "auto"; // Reset the height
+            this.style.height = this.scrollHeight + "px"; // Adjust to scrollHeight
+          });
+
+          // Auto-scroll chat history using MutationObserver
+          const chatHistory = document.getElementById("chat-history");
+          const observer = new MutationObserver(() => {
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+          });
+          observer.observe(chatHistory, { childList: true });
+        });
+
         async function loadDocumentsAndScripts() {
           try {
             // Fetch documents
@@ -123,7 +133,6 @@
 
             conversationScript.onload = () => {
               const knowledgeLoadingScript = document.createElement("script");
-              knowledgeLoadingScript.src = "/js/knowledge_loading.js";
               document.body.appendChild(knowledgeLoadingScript);
             };
           } catch (error) {
