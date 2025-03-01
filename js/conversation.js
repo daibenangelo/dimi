@@ -119,28 +119,69 @@ function sendMessage(message) {
 function displayMessage(sender, message) {
   const isUser = sender === "You";
   const messageClass = isUser ? "user-message" : "bot-message";
+
+  // Create message container
   const messageContainer = $(`
     <div class="chat-message ${messageClass}">
       <div class="sender">${sender}</div>
-      <div class="message"></div>
+      <div class="message">${message}</div>
     </div>
   `);
+
+  if (!isUser) {
+    // Add thumbs-up and thumbs-down buttons for AI messages
+    const feedbackButtons = $(`
+      <div class="feedback">
+        <button class="thumbs-up">👍</button>
+        <button class="thumbs-down">👎</button>
+      </div>
+    `);
+
+    messageContainer.append(feedbackButtons);
+
+    feedbackButtons.hide();
+
+    messageContainer.hover(
+      function () {
+        feedbackButtons.show();
+      },
+      function () {
+        feedbackButtons.hide();
+      }
+    );
+
+    // Handle button clicks
+    feedbackButtons.find(".thumbs-up").on("click", function () {
+      saveFeedback(message, "👍");
+    });
+
+    feedbackButtons.find(".thumbs-down").on("click", function () {
+      saveFeedback(message, "👎");
+    });
+  }
 
   $("#chat-history").append(messageContainer);
   messageContainer.hide().fadeIn(300);
 
-  const messageElement = messageContainer.find(".message");
-  let index = 0;
-  function typeText() {
-    if (index < message.length) {
-      messageElement.append(message[index]);
-      index++;
-      setTimeout(typeText, 10);
-    }
-  }
-  typeText();
-
   $("#chat-history").scrollTop($("#chat-history")[0].scrollHeight);
+}
+
+// Save feedback to localStorage
+function saveFeedback(message, feedback) {
+  let chatFeedback = JSON.parse(localStorage.getItem("chatFeedback")) || [];
+  chatFeedback.push({ message, feedback });
+  localStorage.setItem("chatFeedback", JSON.stringify(chatFeedback));
+  displaySavedFeedback();
+}
+
+// Display saved feedback in the "Testing" tab
+function displaySavedFeedback() {
+  const chatFeedback = JSON.parse(localStorage.getItem("chatFeedback")) || [];
+  $("#test").html(
+    chatFeedback
+      .map((entry) => `<p>${entry.message} - ${entry.feedback}</p>`)
+      .join("")
+  );
 }
 
 $(document).ready(function () {
@@ -165,4 +206,5 @@ $(document).ready(function () {
     });
   });
   displaySavedData();
+  displaySavedFeedback();
 });
