@@ -27,7 +27,9 @@ function displaySavedData() {
 
 function sendMessage(message) {
   saveToLocalStorage("userPrompts", message);
-  displayMessage("You", message);
+
+  // Remove this line to prevent duplicate messages:
+  // displayMessage("You", message);
 
   // Show typing animation
   const typingAnimation = $(`
