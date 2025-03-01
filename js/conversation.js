@@ -44,16 +44,7 @@ function sendMessage(message) {
   `);
   $("#chat-history").append(typingAnimation);
   $("#chat-history").scrollTop($("#chat-history")[0].scrollHeight);
-  const knowledgeBaseTab = $("#knowledge-base");
-  knowledgeBaseTab.empty();
 
-  if (documents && documents.length > 0) {
-    documents.forEach((doc) => {
-      knowledgeBaseTab.append(`<li>${doc.filename}</li>`);
-    });
-  } else {
-    knowledgeBaseTab.append("<li>No documents selected</li>");
-  }
   $.ajax({
     url: "https://dimi-6hqw.onrender.com/select-documents",
     method: "POST",
@@ -61,6 +52,7 @@ function sendMessage(message) {
     data: JSON.stringify({ userQuery: message }),
     success: function (response) {
       typingAnimation.remove();
+      const { documents } = response;
 
       const knowledgeBaseTab = $("#knowledge-base");
       knowledgeBaseTab.empty();
@@ -73,7 +65,6 @@ function sendMessage(message) {
         knowledgeBaseTab.append("<li>No documents selected</li>");
       }
 
-      const { documents } = response;
       const systemPrompt = `The following documents are relevant:\n${documents
         .map((doc) => `\n${doc.filename}:\n${doc.content}`)
         .join("\n")}\n\nUser's query: "${message}"`;
