@@ -18,7 +18,7 @@ function displaySavedData() {
   const aiResponses = JSON.parse(localStorage.getItem("aiResponses")) || [];
   const feedbackData = JSON.parse(localStorage.getItem("aiFeedback")) || {};
 
-  $("#testing-tab-content").html(
+  $("#testing-section").html(
     userPrompts
       .map((prompt, index) => {
         const response = aiResponses[index] || "No response";
