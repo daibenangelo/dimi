@@ -16,22 +16,24 @@ function saveToLocalStorage(key, value) {
 function displaySavedData() {
   const userPrompts = JSON.parse(localStorage.getItem("userPrompts")) || [];
   const aiResponses = JSON.parse(localStorage.getItem("aiResponses")) || [];
+  const feedbackData = JSON.parse(localStorage.getItem("aiFeedback")) || {};
 
   $("#user-prompt").html(
     userPrompts.map((prompt) => `<p>${prompt}</p>`).join("")
   );
   $("#ai-results").html(
-    aiResponses.map((response) => `<p>${response}</p>`).join("")
+    aiResponses
+      .map((response, index) => {
+        const feedback = feedbackData[index] || "No feedback";
+        return `<p>${response} <span class="text-muted">(${feedback})</span></p>`;
+      })
+      .join("")
   );
 }
 
 function sendMessage(message) {
   saveToLocalStorage("userPrompts", message);
 
-  // Remove this line to prevent duplicate messages:
-  // displayMessage("You", message);
-
-  // Show typing animation
   const typingAnimation = $(`
     <div class="chat-message bot-message typing">
       <div class="sender">Dimi</div>
@@ -49,31 +51,12 @@ function sendMessage(message) {
     contentType: "application/json",
     data: JSON.stringify({ userQuery: message }),
     success: function (response) {
-      typingAnimation.remove(); // Remove animation
-
+      typingAnimation.remove();
       const { documents } = response;
-      const knowledgeBaseTab = $("#knowledge-base");
-      knowledgeBaseTab.empty();
+      const systemPrompt = `The following documents are relevant:\n${documents
+        .map((doc) => `\n${doc.filename}:\n${doc.content}`)
+        .join("\n")}\n\nUser's query: "${message}"`;
 
-      if (documents && documents.length > 0) {
-        documents.forEach((doc) => {
-          knowledgeBaseTab.append(`<li>${doc.filename}</li>`);
-        });
-      } else {
-        knowledgeBaseTab.append("<li>No documents selected</li>");
-      }
-
-      const systemPrompt = `
-        The following documents are relevant to the user's query. Use this context to answer the question.
-        Documents:
-        ${documents
-          .map((doc) => `\n${doc.filename}:\n${doc.content}`)
-          .join("\n")}
-        
-        User's query: "${message}"
-      `;
-
-      // Show typing animation again for AI response
       $("#chat-history").append(typingAnimation);
       $("#chat-history").scrollTop($("#chat-history")[0].scrollHeight);
 
@@ -92,16 +75,17 @@ function sendMessage(message) {
           ],
         }),
         success: function (response) {
-          typingAnimation.remove(); // Remove animation
+          typingAnimation.remove();
           const botMessage = response.choices[0].message.content;
-          displayMessage("Dimi", botMessage);
+          displayMessage("Dimi", botMessage, true);
           saveToLocalStorage("aiResponses", botMessage);
         },
         error: function () {
           typingAnimation.remove();
           displayMessage(
             "Dimi",
-            "Sorry, there was an error communicating with the AI."
+            "Sorry, there was an error communicating with the AI.",
+            true
           );
         },
       });
@@ -110,17 +94,15 @@ function sendMessage(message) {
       typingAnimation.remove();
       displayMessage(
         "Dimi",
-        "Sorry, there was an error selecting the context documents."
+        "Sorry, there was an error selecting the context documents.",
+        true
       );
     },
   });
 }
 
-function displayMessage(sender, message) {
-  const isUser = sender === "You";
-  const messageClass = isUser ? "user-message" : "bot-message";
-
-  // Create message container
+function displayMessage(sender, message, isBot = false) {
+  const messageClass = sender === "You" ? "user-message" : "bot-message";
   const messageContainer = $(`
     <div class="chat-message ${messageClass}">
       <div class="sender">${sender}</div>
@@ -128,66 +110,53 @@ function displayMessage(sender, message) {
     </div>
   `);
 
-  if (!isUser) {
-    // Add thumbs-up and thumbs-down buttons for AI messages
-    const feedbackButtons = $(`
-      <div class="feedback">
-        <button class="thumbs-up">👍</button>
-        <button class="thumbs-down">👎</button>
-      </div>
-    `);
-
-    messageContainer.append(feedbackButtons);
-
-    feedbackButtons.hide();
-
-    messageContainer.hover(
-      function () {
-        feedbackButtons.show();
-      },
-      function () {
-        feedbackButtons.hide();
-      }
+  if (isBot) {
+    const feedbackContainer = $('<div class="feedback-icons"></div>').hide();
+    const thumbsUp = $(
+      '<button class="btn btn-outline-success btn-sm mx-1"><i class="bi bi-hand-thumbs-up"></i></button>'
+    );
+    const thumbsDown = $(
+      '<button class="btn btn-outline-danger btn-sm mx-1"><i class="bi bi-hand-thumbs-down"></i></button>'
     );
 
-    // Handle button clicks
-    feedbackButtons.find(".thumbs-up").on("click", function () {
-      saveFeedback(message, "👍");
+    thumbsUp.on("click", function () {
+      saveFeedback(message, "Liked");
+      feedbackContainer.html('<span class="text-success">👍 Liked</span>');
     });
 
-    feedbackButtons.find(".thumbs-down").on("click", function () {
-      saveFeedback(message, "👎");
+    thumbsDown.on("click", function () {
+      saveFeedback(message, "Disliked");
+      feedbackContainer.html('<span class="text-danger">👎 Disliked</span>');
     });
+
+    feedbackContainer.append(thumbsUp, thumbsDown);
+    messageContainer.append(feedbackContainer);
+    messageContainer.hover(
+      () => feedbackContainer.fadeIn(),
+      () => feedbackContainer.fadeOut()
+    );
   }
 
   $("#chat-history").append(messageContainer);
   messageContainer.hide().fadeIn(300);
-
   $("#chat-history").scrollTop($("#chat-history")[0].scrollHeight);
 }
 
-// Save feedback to localStorage
 function saveFeedback(message, feedback) {
-  let chatFeedback = JSON.parse(localStorage.getItem("chatFeedback")) || [];
-  chatFeedback.push({ message, feedback });
-  localStorage.setItem("chatFeedback", JSON.stringify(chatFeedback));
-  displaySavedFeedback();
-}
+  let aiResponses = JSON.parse(localStorage.getItem("aiResponses")) || [];
+  let feedbackData = JSON.parse(localStorage.getItem("aiFeedback")) || {};
+  let index = aiResponses.indexOf(message);
 
-// Display saved feedback in the "Testing" tab
-function displaySavedFeedback() {
-  const chatFeedback = JSON.parse(localStorage.getItem("chatFeedback")) || [];
-  $("#test").html(
-    chatFeedback
-      .map((entry) => `<p>${entry.message} - ${entry.feedback}</p>`)
-      .join("")
-  );
+  if (index !== -1) {
+    feedbackData[index] = feedback;
+    localStorage.setItem("aiFeedback", JSON.stringify(feedbackData));
+  }
 }
 
 $(document).ready(function () {
   displayMessage(
     "Dimi",
-    "Hi! I am Dimi, the Don Mariano Marcos Memorial State University (DMMMSU) chatbot. What can I help you with?"
+    "Hi! I am Dimi, the DMMMSU chatbot. What can I help you with?"
   );
   fetchApiKey().then(function () {
     $("#send-btn").on("click", function () {
@@ -206,5 +175,4 @@ $(document).ready(function () {
     });
   });
   displaySavedData();
-  displaySavedFeedback();
 });
