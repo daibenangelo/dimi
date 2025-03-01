@@ -3,12 +3,32 @@ const apiUrl = "https://api.openai.com/v1/chat/completions";
 
 function fetchApiKey() {
   return $.getJSON("/api/env", function (data) {
-    apiKey = data.apiKey; // Store the API key from the server response
+    apiKey = data.apiKey;
   });
 }
 
+function saveToLocalStorage(key, value) {
+  let storedData = JSON.parse(localStorage.getItem(key)) || [];
+  storedData.push(value);
+  localStorage.setItem(key, JSON.stringify(storedData));
+}
+
+function displaySavedData() {
+  const userPrompts = JSON.parse(localStorage.getItem("userPrompts")) || [];
+  const aiResponses = JSON.parse(localStorage.getItem("aiResponses")) || [];
+
+  $("#user-prompt").html(
+    userPrompts.map((prompt) => `<p>${prompt}</p>`).join("")
+  );
+  $("#ai-results").html(
+    aiResponses.map((response) => `<p>${response}</p>`).join("")
+  );
+}
+
 function sendMessage(message) {
-  // Step 1: Select documents based on the user query
+  saveToLocalStorage("userPrompts", message);
+  displaySavedData();
+
   $.ajax({
     url: "https://dimi-6hqw.onrender.com/select-documents",
     method: "POST",
@@ -16,33 +36,27 @@ function sendMessage(message) {
     data: JSON.stringify({ userQuery: message }),
     success: function (response) {
       const { documents } = response;
-
-      // Display selected document names under Knowledge Base tab
       const knowledgeBaseTab = $("#knowledge-base");
-      knowledgeBaseTab.empty(); // Clear previous content
+      knowledgeBaseTab.empty();
+
       if (documents && documents.length > 0) {
         documents.forEach((doc) => {
           knowledgeBaseTab.append(`<li>${doc.filename}</li>`);
-          console.log(doc.filename);
         });
       } else {
         knowledgeBaseTab.append("<li>No documents selected</li>");
       }
 
-      // Prepare the system prompt using document content
       const systemPrompt = `
         The following documents are relevant to the user's query. Use this context to answer the question.
         Documents:
         ${documents
           .map((doc) => `\n${doc.filename}:\n${doc.content}`)
           .join("\n")}
-  
+        
         User's query: "${message}"
       `;
 
-      console.log(systemPrompt);
-
-      // Send the user's query and context to OpenAI API
       $.ajax({
         url: apiUrl,
         method: "POST",
@@ -58,12 +72,12 @@ function sendMessage(message) {
           ],
         }),
         success: function (response) {
-          console.log("Response from /select-documents:", response);
           const botMessage = response.choices[0].message.content;
           displayMessage("Dimi", botMessage);
+          saveToLocalStorage("aiResponses", botMessage);
+          displaySavedData();
         },
-        error: function (xhr, status, error) {
-          console.error("Error:", error);
+        error: function () {
           displayMessage(
             "Dimi",
             "Sorry, there was an error communicating with the AI."
@@ -71,8 +85,7 @@ function sendMessage(message) {
         },
       });
     },
-    error: function (xhr, status, error) {
-      console.error("Error selecting documents:", error);
+    error: function () {
       displayMessage(
         "Dimi",
         "Sorry, there was an error selecting the context documents."
@@ -82,11 +95,8 @@ function sendMessage(message) {
 }
 
 function displayMessage(sender, message) {
-  // Determine the message alignment and styling
   const isUser = sender === "You";
   const messageClass = isUser ? "user-message" : "bot-message";
-
-  // Create the message container
   const messageContainer = $(`
     <div class="chat-message ${messageClass}">
       <div class="sender">${sender}</div>
@@ -94,26 +104,20 @@ function displayMessage(sender, message) {
     </div>
   `);
 
-  // Append the container to the chat history
   $("#chat-history").append(messageContainer);
-
-  // Animate the chat message popping in
   messageContainer.hide().fadeIn(300);
 
-  // Animate text appearance one letter at a time
   const messageElement = messageContainer.find(".message");
   let index = 0;
-
   function typeText() {
     if (index < message.length) {
       messageElement.append(message[index]);
       index++;
-      setTimeout(typeText, 10); // Adjust typing speed (30ms per letter)
+      setTimeout(typeText, 10);
     }
   }
   typeText();
 
-  // Scroll to the latest message
   $("#chat-history").scrollTop($("#chat-history")[0].scrollHeight);
 }
 
@@ -122,7 +126,6 @@ $(document).ready(function () {
     "Dimi",
     "Hi! I am Dimi, the Don Mariano Marcos Memorial State University (DMMMSU) chatbot. What can I help you with?"
   );
-  // Fetch API key once the document is ready
   fetchApiKey().then(function () {
     $("#send-btn").on("click", function () {
       const userInput = $("#user-input").val();
@@ -135,9 +138,9 @@ $(document).ready(function () {
 
     $("#user-input").on("keypress", function (e) {
       if (e.which === 13) {
-        // Enter key
         $("#send-btn").click();
       }
     });
   });
+  displaySavedData();
 });
