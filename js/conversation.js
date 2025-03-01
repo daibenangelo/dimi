@@ -27,7 +27,19 @@ function displaySavedData() {
 
 function sendMessage(message) {
   saveToLocalStorage("userPrompts", message);
-  displaySavedData();
+  displayMessage("You", message);
+
+  // Show typing animation
+  const typingAnimation = $(`
+    <div class="chat-message bot-message typing">
+      <div class="sender">Dimi</div>
+      <div class="message">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+    </div>
+  `);
+  $("#chat-history").append(typingAnimation);
+  $("#chat-history").scrollTop($("#chat-history")[0].scrollHeight);
 
   $.ajax({
     url: "https://dimi-6hqw.onrender.com/select-documents",
@@ -35,6 +47,8 @@ function sendMessage(message) {
     contentType: "application/json",
     data: JSON.stringify({ userQuery: message }),
     success: function (response) {
+      typingAnimation.remove(); // Remove animation
+
       const { documents } = response;
       const knowledgeBaseTab = $("#knowledge-base");
       knowledgeBaseTab.empty();
@@ -57,6 +71,10 @@ function sendMessage(message) {
         User's query: "${message}"
       `;
 
+      // Show typing animation again for AI response
+      $("#chat-history").append(typingAnimation);
+      $("#chat-history").scrollTop($("#chat-history")[0].scrollHeight);
+
       $.ajax({
         url: apiUrl,
         method: "POST",
@@ -72,12 +90,13 @@ function sendMessage(message) {
           ],
         }),
         success: function (response) {
+          typingAnimation.remove(); // Remove animation
           const botMessage = response.choices[0].message.content;
           displayMessage("Dimi", botMessage);
           saveToLocalStorage("aiResponses", botMessage);
-          displaySavedData();
         },
         error: function () {
+          typingAnimation.remove();
           displayMessage(
             "Dimi",
             "Sorry, there was an error communicating with the AI."
@@ -86,6 +105,7 @@ function sendMessage(message) {
       });
     },
     error: function () {
+      typingAnimation.remove();
       displayMessage(
         "Dimi",
         "Sorry, there was an error selecting the context documents."
