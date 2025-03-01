@@ -18,14 +18,12 @@ function displaySavedData() {
   const aiResponses = JSON.parse(localStorage.getItem("aiResponses")) || [];
   const feedbackData = JSON.parse(localStorage.getItem("aiFeedback")) || {};
 
-  $("#user-prompt").html(
-    userPrompts.map((prompt) => `<p>${prompt}</p>`).join("")
-  );
-  $("#ai-results").html(
-    aiResponses
-      .map((response, index) => {
+  $("#testing-tab-content").html(
+    userPrompts
+      .map((prompt, index) => {
+        const response = aiResponses[index] || "No response";
         const feedback = feedbackData[index] || "No feedback";
-        return `<p>${response} <span class="text-muted">(${feedback})</span></p>`;
+        return `<p><strong>You:</strong> ${prompt} <br><strong>Dimi:</strong> ${response} <span class="text-muted">(${feedback})</span></p>`;
       })
       .join("")
   );
@@ -33,15 +31,16 @@ function displaySavedData() {
 
 function sendMessage(message) {
   saveToLocalStorage("userPrompts", message);
+  updateTestingTab();
 
-  const typingAnimation = $(`
-    <div class="chat-message bot-message typing">
+  const typingAnimation = $(
+    `<div class="chat-message bot-message typing">
       <div class="sender">Dimi</div>
       <div class="message">
         <span class="dot"></span><span class="dot"></span><span class="dot"></span>
       </div>
-    </div>
-  `);
+    </div>`
+  );
   $("#chat-history").append(typingAnimation);
   $("#chat-history").scrollTop($("#chat-history")[0].scrollHeight);
 
@@ -91,6 +90,7 @@ function sendMessage(message) {
           const botMessage = response.choices[0].message.content;
           displayMessage("Dimi", botMessage, true);
           saveToLocalStorage("aiResponses", botMessage);
+          updateTestingTab();
         },
         error: function () {
           typingAnimation.remove();
@@ -115,30 +115,34 @@ function sendMessage(message) {
 
 function displayMessage(sender, message, isBot = false) {
   const messageClass = sender === "You" ? "user-message" : "bot-message";
-  const messageContainer = $(`
-    <div class="chat-message ${messageClass}">
+  const messageContainer = $(
+    `<div class="chat-message ${messageClass}">
       <div class="sender">${sender}</div>
       <div class="message">${message}</div>
-    </div>
-  `);
+    </div>`
+  );
 
   if (isBot) {
-    const feedbackContainer = $('<div class="feedback-icons"></div>').hide();
+    const feedbackContainer = $(
+      '<div class="feedback-icons mt-2"></div>'
+    ).hide();
     const thumbsUp = $(
-      '<button class="btn btn-outline-success btn-sm mx-1">👍</button>'
+      '<button class="btn btn-outline-success btn-sm mx-1"><i class="bi bi-hand-thumbs-up"></i></button>'
     );
     const thumbsDown = $(
-      '<button class="btn btn-outline-danger btn-sm mx-1">👎</button>'
+      '<button class="btn btn-outline-danger btn-sm mx-1"><i class="bi bi-hand-thumbs-down"></i></button>'
     );
 
     thumbsUp.on("click", function () {
       saveFeedback(message, "Liked");
       feedbackContainer.html('<span class="text-success">Liked!</span>');
+      updateTestingTab();
     });
 
     thumbsDown.on("click", function () {
       saveFeedback(message, "Disliked");
       feedbackContainer.html('<span class="text-danger">Disliked!</span>');
+      updateTestingTab();
     });
 
     feedbackContainer.append(thumbsUp, thumbsDown);
@@ -163,6 +167,10 @@ function saveFeedback(message, feedback) {
     feedbackData[index] = feedback;
     localStorage.setItem("aiFeedback", JSON.stringify(feedbackData));
   }
+}
+
+function updateTestingTab() {
+  displaySavedData();
 }
 
 $(document).ready(function () {
