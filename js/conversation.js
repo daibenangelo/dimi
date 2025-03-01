@@ -113,20 +113,20 @@ function displayMessage(sender, message, isBot = false) {
   if (isBot) {
     const feedbackContainer = $('<div class="feedback-icons"></div>').hide();
     const thumbsUp = $(
-      '<button class="btn btn-outline-success btn-sm mx-1"><i class="bi bi-hand-thumbs-up"></i></button>'
+      '<button class="btn btn-outline-success btn-sm mx-1">👍</button>'
     );
     const thumbsDown = $(
-      '<button class="btn btn-outline-danger btn-sm mx-1"><i class="bi bi-hand-thumbs-down"></i></button>'
+      '<button class="btn btn-outline-danger btn-sm mx-1">👎</button>'
     );
 
     thumbsUp.on("click", function () {
       saveFeedback(message, "Liked");
-      feedbackContainer.html('<span class="text-success">👍 Liked</span>');
+      feedbackContainer.html('<span class="text-success">Liked!</span>');
     });
 
     thumbsDown.on("click", function () {
       saveFeedback(message, "Disliked");
-      feedbackContainer.html('<span class="text-danger">👎 Disliked</span>');
+      feedbackContainer.html('<span class="text-danger">Disliked!</span>');
     });
 
     feedbackContainer.append(thumbsUp, thumbsDown);
